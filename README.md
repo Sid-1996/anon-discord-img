@@ -52,25 +52,25 @@
 
 ### 第二步：部署到 Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Sid-1996/anon-discord-img&env=DISCORD_WEBHOOK_URL,ACCESS_TOKEN&envDescription=DISCORD_WEBHOOK_URL%3A%20your%20webhook%20URL%3B%20ACCESS_TOKEN%3A%20a%20random%20password%20to%20protect%20your%20instance&project-name=anon-discord-img&repository-name=anon-discord-img)
 
 **中文步驟：**
 
-1. 點上面的 **Deploy** 按鈕
-2. 匯入這個 GitHub 倉庫
-3. 在「Environment Variables」頁面新增：
+1. 點上面的 **Deploy** 按鈕 — Vercel 會自動把這個倉庫 fork 到你的 GitHub 帳號，不需要手動操作
+2. 登入（或註冊）Vercel 帳號，授權連接 GitHub
+3. 在「Configure Project」頁面填入兩個環境變數：
    - `DISCORD_WEBHOOK_URL` — 貼上第一步拿到的 Webhook 網址
-   - `ACCESS_TOKEN` — 自訂一組密碼（例如 `MyR4nd0mK3y!`），保護你的服務不被陌生人亂用
-4. 按 Deploy — 完成！你的網址是 `https://你的專案名.vercel.app`
+   - `ACCESS_TOKEN` — 自訂一組密碼（例如 `MyR4nd0mK3y!`），之後在網頁的 Token 欄位輸入這個值才能使用
+4. 按 **Deploy** — 部署完成！你的網址是 `https://你的專案名.vercel.app`
 
 **In English:**
 
-1. Click the **Deploy** button above
-2. Import this repository
-3. Add these environment variables:
+1. Click the **Deploy** button above — Vercel will automatically fork this repo to your GitHub account
+2. Log in (or sign up) to Vercel and authorize GitHub access
+3. Fill in two environment variables on the "Configure Project" page:
    - `DISCORD_WEBHOOK_URL` — your webhook URL from step 1
-   - `ACCESS_TOKEN` — pick a strong random string to block unauthorized users
-4. Hit Deploy — done. Your instance is live at `https://your-project.vercel.app`
+   - `ACCESS_TOKEN` — a random password (e.g. `MyR4nd0mK3y!`); you'll enter this in the Token field on the web page
+4. Hit **Deploy** — done. Your instance is live at `https://your-project.vercel.app`
 
 ---
 
@@ -92,6 +92,50 @@ vercel dev
 ```
 
 開啟瀏覽器前往 `http://localhost:3000`。
+
+---
+
+## 使用方式 How to Use
+
+部署完成後，打開你的 Vercel 網址，即可看到上傳介面。
+
+Once deployed, open your Vercel URL to access the upload interface.
+
+### 首次設定 First-time Setup
+
+在頁面右上角（或設定區塊）找到 **Token** 欄位，輸入你在部署時設定的 `ACCESS_TOKEN` 值，按確認儲存。之後同一瀏覽器不需要重複輸入。
+
+Find the **Token** field (top-right or settings area), enter the `ACCESS_TOKEN` you set during deployment, and confirm. The browser will remember it for future visits.
+
+### 上傳圖片 Upload an Image
+
+| 方式 Method | 操作 Action |
+|---|---|
+| 拖曳 Drag & drop | 直接把圖片拖進頁面 / Drag image onto the page |
+| 貼上 Paste | 複製圖片後按 `Ctrl+V` / Copy image then `Ctrl+V` |
+| 選取 File picker | 點選頁面上的上傳區塊 / Click the upload area |
+
+圖片上傳後會自動加上暴雷遮罩（`SPOILER_` 前綴），在 Discord 頻道需點擊才能顯示。
+
+Images are automatically spoiler-tagged (`SPOILER_` prefix) — Discord members must click to reveal them.
+
+### 馬賽克筆刷 Mosaic Brush
+
+上傳圖片後可選擇啟用馬賽克筆刷，在圖片上塗抹需要遮蓋的區域。所有處理在瀏覽器內完成，圖片內容不會外送。
+
+After uploading, enable the mosaic brush to paint over areas you want to hide. All processing is done locally in your browser — no image data is sent externally.
+
+### 發送 URL Send a URL
+
+在 URL 欄位貼上 Twitter/X 貼文連結或 Pixiv 圖片網址，直接發送到 Discord，無需下載再上傳。
+
+Paste a Twitter/X post URL or Pixiv image URL into the URL field and send directly to Discord — no manual download needed.
+
+### 撤回訊息 Recall a Message
+
+發送後 3 天內，在「發送歷史」清單中找到對應訊息，點選 **撤回** 即可從 Discord 頻道刪除該則訊息。
+
+Within 3 days of sending, find the message in the send history list and click **Recall** to delete it from the Discord channel.
 
 ---
 
