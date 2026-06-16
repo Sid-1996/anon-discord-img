@@ -9,11 +9,19 @@
 
 ## 🆕 完全不懂技術？用 AI 幫你搞定 No Tech Skills? Let AI Do It
 
-### 💬 方法一：讓 ChatGPT 帶你一步一步做 (Guided Setup via ChatGPT)
+### 💬 方法一：讓 AI 帶你一步一步做 (Guided Setup via AI Chat)
 
-把下面這段文字複製，貼進 [ChatGPT](https://chat.openai.com) 或任何 AI 對話框，讓它帶你完成整個部署流程：
+> 💡 **推薦工具：[Google Gemini](https://gemini.google.com/app)**（免費，有桌面 App）
+> Gemini 支援**視覺模型**——你可以直接把螢幕截圖丟給它，它會看著你的畫面告訴你下一步要點哪裡，比純文字教學直觀很多。
+>
+> 💡 **Recommended: [Google Gemini](https://gemini.google.com/app)** (free, desktop app available)
+> Gemini supports **vision** — you can paste screenshots directly into the chat and it will look at your screen to guide you, far more intuitive than text-only instructions.
+>
+> 下載桌面版 / Download desktop app: [gemini.google.com/app](https://gemini.google.com/app)
 
-Copy the prompt below and paste it into [ChatGPT](https://chat.openai.com) — the AI will walk you through every step:
+把下面這段文字複製，貼進 Gemini 或任何 AI 對話框，讓它帶你完成整個部署流程。遇到看不懂的畫面，直接截圖貼給它問：
+
+Copy the prompt below and paste it into Gemini or any AI chat. If you get stuck on any screen, just take a screenshot and paste it into the chat to ask:
 
 ```
 我想部署一個開源工具，GitHub 網址是 https://github.com/Sid-1996/anon-discord-img
