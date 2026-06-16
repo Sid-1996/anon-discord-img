@@ -1,0 +1,11 @@
+{
+  "name": "discord-spoiler-uploader",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Auto-spoiler anonymous image uploader for Discord",
+  "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "formidable": "^3.5.2",
+    "sharp": "^0.34.5"
+  }
+}

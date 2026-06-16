@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動暴雷匿名發圖器</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 520px; margin: 0 auto; padding: 24px 16px;
+            background-color: #2f3136; color: #dcddde;
+        }
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 4px; }
+        .header p { font-size: 13px; color: #72767d; line-height: 1.5; }
+
+        .drop-zone {
+            border: 1.5px dashed #4f545c; border-radius: 12px;
+            padding: 48px 20px; text-align: center; cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            background: #292b2f;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { background: #36393f; border-color: #7289da; }
+        .drop-zone .dz-icon { font-size: 32px; display: block; margin-bottom: 12px; color: #72767d; }
+        .drop-zone .dz-main { font-size: 14px; font-weight: 500; color: #dcddde; margin-bottom: 6px; }
+        .drop-zone .dz-hint { font-size: 12px; color: #72767d; line-height: 1.7; }
+        .drop-zone .dz-hint b { font-weight: 500; color: #a0a4aa; }
+
+        .preview-card {
+            border: 0.5px solid #3a3d44; border-radius: 12px;
+            overflow: hidden; background: #36393f;
+        }
+        .preview-img-wrap {
+            background: #000; display: flex; align-items: center; justify-content: center;
+            min-height: 200px; max-height: 55vh; overflow: hidden; position: relative; -webkit-user-select: none; user-select: none;
+        }
+        .preview-img-wrap img,
+        .preview-img-wrap canvas { max-width: 100%; max-height: 55vh; object-fit: contain; display: block; }
+        .preview-img-wrap canvas { cursor: none; }
+        #preview-canvas { touch-action: none; -webkit-touch-callout: none; }
+        .brush-cursor {
+            position: absolute; pointer-events: none; z-index: 1;
+            border: 1.5px solid rgba(255,255,255,0.6); border-radius: 50%;
+        }
+        .preview-body { padding: 14px; }
+
+        .caption-wrap { position: relative; margin-bottom: 12px; }
+        .caption-wrap textarea {
+            width: 100%; resize: none; border: 0.5px solid #4f545c; border-radius: 8px;
+            padding: 9px 44px 9px 12px; font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #292b2f; color: #dcddde; outline: none;
+            min-height: 40px; line-height: 1.5; overflow-y: hidden;
+        }
+        .caption-wrap textarea:focus { border-color: #7289da; }
+        .caption-wrap textarea::placeholder { color: #72767d; }
+        .caption-wrap .char {
+            position: absolute; right: 10px; bottom: 10px;
+            font-size: 11px; color: #72767d; pointer-events: none;
+        }
+
+        .btn-row { display: flex; gap: 8px; }
+        .btn {
+            padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
+            cursor: pointer; border: 0.5px solid #4f545c;
+            background: transparent; color: #dcddde;
+            transition: background 0.12s; white-space: nowrap;
+            font-family: inherit;
+        }
+        .btn:hover { background: #40444b; }
+        .btn:active { opacity: 0.75; transform: scale(0.97); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn-send {
+            background: #404776; border-color: #5865f2; color: #c5c8f8; flex: 1;
+        }
+        .btn-send:hover { background: #4a5288; }
+
+        .spoiler-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-bottom: 0.5px solid #3a3d44;
+        }
+        .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
+        .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle .track {
+            position: absolute; inset: 0; border-radius: 10px;
+            background: #4f545c; transition: background 0.2s;
+        }
+        .toggle .thumb {
+            position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+            border-radius: 50%; background: #dcddde; transition: transform 0.2s;
+            pointer-events: none;
+        }
+        .toggle input:checked + .track { background: #5865f2; }
+        .toggle input:checked ~ .thumb { transform: translateX(16px); }
+        .toggle-label { font-size: 13px; color: #b9bbbe; }
+        .platform-badge {
+            font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px;
+            margin-left: auto; background: #2f3136; border: 0.5px solid #4f545c; color: #72767d;
+        }
+        .mode-hint { font-size: 12px; color: #72767d; padding: 6px 14px 0; min-height: 20px; }
+
+        #url-loading {
+            font-size: 13px; color: #72767d; padding: 40px 20px;
+            text-align: center; width: 100%;
+        }
+
+        .status { margin-top: 12px; font-size: 13px; font-weight: 500; min-height: 20px; text-align: center; }
+        .status.ok { color: #43b581; }
+        .status.err { color: #f04747; }
+
+        .history { margin-top: 24px; }
+        .history-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .history-hdr .hdr-label { font-size: 12px; font-weight: 500; color: #72767d; text-transform: uppercase; letter-spacing: 0.04em; }
+        .clear-btn {
+            font-size: 12px; color: #72767d; background: none;
+            border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+            font-family: inherit;
+        }
+        .clear-btn:hover { background: #40444b; color: #f04747; }
+
+        .history-item {
+            display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+            border-radius: 8px; border: 0.5px solid #3a3d44;
+            margin-bottom: 6px; background: #36393f;
+        }
+        .hi-icon { font-size: 15px; color: #72767d; flex-shrink: 0; }
+        .hi-text { flex: 1; font-size: 13px; color: #b9bbbe; min-width: 0; }
+        .hi-del {
+            font-size: 12px; background: none; border: none; cursor: pointer;
+            color: #72767d; padding: 3px 7px; border-radius: 4px;
+            white-space: nowrap; font-family: inherit;
+        }
+        .hi-del:hover { background: rgba(240,71,71,0.15); color: #f04747; }
+        .hi-del:active { opacity: 0.75; }
+        .history-empty { text-align: center; font-size: 13px; color: #4f545c; padding: 12px 0; }
+
+        .mosaic-bar {
+            display: flex; gap: 14px; align-items: center;
+            padding: 10px 14px; flex-wrap: wrap;
+            background: #2f3136; border-bottom: 0.5px solid #3a3d44;
+        }
+        .mosaic-bar label {
+            font-size: 11px; color: #72767d;
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .mosaic-bar input[type="range"] { width: 80px; accent-color: #7289da; }
+        .mosaic-bar label span {
+            font-weight: 600;
+            color: #dcddde;
+            margin-left: 4px;
+        }
+        .mosaic-btn {
+            background: #4f545c; border: none; border-radius: 6px;
+            color: #dcddde; padding: 6px 14px; font-size: 12px; cursor: pointer;
+            font-family: inherit; white-space: nowrap;
+        }
+        .mosaic-btn:hover { background: #5d6269; }
+        .mosaic-btn-danger { margin-left: auto; }
+        .mosaic-btn-danger:hover { background: #d83c3e; }
+        .mosaic-btn:active { opacity: 0.75; }
+        .mosaic-tip {
+            width: 100%;
+            font-size: 11px;
+            color: #72767d;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .version { text-align: center; font-size: 11px; color: #4f545c; margin-top: 20px; user-select: none; }
+
+        input[type="file"] { display: none; }
+
+        @media (max-width: 420px) {
+            body { padding: 16px 12px; }
+            .drop-zone { padding: 36px 16px; }
+            .btn { padding: 9px 14px; font-size: 13px; }
+            .mosaic-bar { gap: 10px; padding: 10px 12px; }
+            .mosaic-bar label { font-size: 12px; }
+            .mosaic-bar input[type="range"] { width: 70px; }
+            .mosaic-btn { padding: 7px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<input type="file" id="file-input" accept="image/jpeg,image/png,image/webp">
+
+<div class="header">
+    <h1><i class="ti ti-eye-off" style="font-size:18px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>自動暴雷匿名發圖器</h1>
+    <p>拖曳圖片、貼上連結，一鍵加暴雷傳送到 Discord</p>
+</div>
+
+<div class="drop-zone" id="drop-area">
+    <i class="ti ti-upload dz-icon" aria-hidden="true"></i>
+    <div class="dz-main">點擊選取、拖曳或貼上圖片</div>
+    <div class="dz-hint">
+        支援 JPEG / PNG / WebP，上限 8MB（發送 Discord 時超過 2048px 會自動縮圖）<br>
+        Twitter/X 貼文連結可直接貼上<br>
+        Pixiv 電腦版請<b>右鍵圖片 → 複製圖片網址</b>，手機版請<b>長按圖片 → 複製連結</b>
+    </div>
+</div>
+
+<div id="preview-container" style="display:none">
+    <div class="preview-card">
+        <div class="preview-img-wrap">
+            <canvas id="preview-canvas"></canvas>
+            <div class="brush-cursor" id="brush-cursor" style="display:none"></div>
+        </div>
+        <div class="mosaic-bar">
+            <label>筆刷大小 <span id="brush-size-val">20</span><br><input type="range" id="brush-size" min="10" max="150" step="5" value="20"></label>
+            <label>區塊大小 <span id="block-size-val">4</span><small style="color:#72767d;font-size:10px;margin-left:2px">越大越粗</small><br><input type="range" id="block-size" min="2" max="15" step="2" value="4"></label>
+            <button class="mosaic-btn" id="clear-mosaic-btn" title="清除所有馬賽克，還原原始圖片">清除塗鴉</button>
+            <button class="mosaic-btn" id="save-local-btn" title="下載後製完成的原始解析度 PNG 圖片">儲存圖片</button>
+            <button class="mosaic-btn" id="copy-local-btn" title="複製後製圖片到剪貼簿，不支援時自動下載">複製圖片</button>
+            <p class="mosaic-tip">在圖片上塗抹後可儲存、複製後製圖片，或發送到 Discord</p>
+        </div>
+        <div class="preview-body">
+            <div class="caption-wrap">
+                <textarea id="caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
+                <span class="char" id="char-count">0/50</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-send" id="confirm-btn" title="以暴雷附件方式發送到 Discord">
+                    <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>確認發送
+                </button>
+                <button class="btn" id="cancel-btn" title="取消並回到上傳頁面">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="url-preview-container" style="display:none">
+    <div class="preview-card">
+        <div class="preview-img-wrap" id="url-img-wrap">
+            <div id="url-loading">
+                <i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px" aria-hidden="true"></i>
+                載入預覽中...
+            </div>
+            <img id="url-preview-image" src="" alt="預覽" style="display:none">
+        </div>
+        <div class="spoiler-row">
+            <label class="toggle" for="url-spoiler" aria-label="加上暴雷遮罩">
+                <input type="checkbox" id="url-spoiler" checked>
+                <div class="track"></div>
+                <div class="thumb"></div>
+            </label>
+            <span class="toggle-label">加上暴雷遮罩</span>
+            <span class="platform-badge" id="url-platform"></span>
+        </div>
+        <div class="mode-hint" id="url-mode-hint"></div>
+        <div class="preview-body">
+            <div class="caption-wrap">
+                <textarea id="url-caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
+                <span class="char" id="url-char-count">0/50</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-send" id="url-confirm-btn" title="發送連結到 Discord">
+                    <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>發送
+                </button>
+                <button class="btn" id="url-cancel-btn" title="取消並回到上傳頁面">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="history">
+    <div class="history-hdr">
+        <span class="hdr-label">
+            <i class="ti ti-history" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>發送歷史（3天內）
+        </span>
+        <button class="clear-btn" id="clear-all-btn" title="清除所有發送紀錄（Discord 上的訊息不受影響）">
+            <i class="ti ti-trash" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>清除全部
+        </button>
+    </div>
+    <div id="history-list"></div>
+</div>
+
+<div class="version" id="version-stamp">載入中...</div>
+
+<script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const previewContainer = document.getElementById('preview-container');
+    const previewCanvas = document.getElementById('preview-canvas');
+    const previewCtx = previewCanvas.getContext('2d');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const captionInput = document.getElementById('caption-input');
+    const charCount = document.getElementById('char-count');
+    const statusDiv = document.getElementById('status');
+    const historyList = document.getElementById('history-list');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+
+    const urlPreviewContainer = document.getElementById('url-preview-container');
+    const urlLoading = document.getElementById('url-loading');
+    const urlPreviewImage = document.getElementById('url-preview-image');
+    const urlPlatform = document.getElementById('url-platform');
+    const urlSpoiler = document.getElementById('url-spoiler');
+    const urlModeHint = document.getElementById('url-mode-hint');
+    const urlCaptionInput = document.getElementById('url-caption-input');
+    const urlCharCount = document.getElementById('url-char-count');
+    const urlConfirmBtn = document.getElementById('url-confirm-btn');
+    const urlCancelBtn = document.getElementById('url-cancel-btn');
+    const brushSizeInput = document.getElementById('brush-size');
+    const blockSizeInput = document.getElementById('block-size');
+    const clearMosaicBtn = document.getElementById('clear-mosaic-btn');
+    const brushCursor = document.getElementById('brush-cursor');
+
+    const brushSizeVal = document.getElementById('brush-size-val');
+    const blockSizeVal = document.getElementById('block-size-val');
+
+    brushSizeInput.addEventListener('input', () => {
+        brushSizeVal.textContent = brushSizeInput.value;
+    });
+    blockSizeInput.addEventListener('input', () => {
+        blockSizeVal.textContent = blockSizeInput.value;
+    });
+
+    let currentFile = null, currentUrl = null, currentUrlPlatform = '';
+    let lastMousePos = null;
+    let offscreenCanvas = null, mosaicApplied = false, isPainting = false;
+    let originalCanvas = null, originalCtx = null, originalImageDataUrl = null;
+    let isComposing = false, uploadHistory = [], historyExpanded = false;
+
+    function generateThumb(source) {
+        const size = 80;
+        const tc = document.createElement('canvas');
+        tc.width = size; tc.height = size;
+        const tctx = tc.getContext('2d');
+        const sw = source.naturalWidth || source.width;
+        const sh = source.naturalHeight || source.height;
+        const scale = Math.max(size / sw, size / sh);
+        const dw = sw * scale, dh = sh * scale;
+        tctx.drawImage(source, (size - dw) / 2, (size - dh) / 2, dw, dh);
+        return tc.toDataURL('image/jpeg', 0.7);
+    }
+
+    const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+    function loadHistory() {
+        try {
+            const data = localStorage.getItem('upload_history');
+            const all = data ? JSON.parse(data) : [];
+            const cutoff = Date.now() - THREE_DAYS_MS;
+            const filtered = all.filter(i => i.ts && i.ts >= cutoff);
+            uploadHistory = filtered;
+            if (filtered.length !== all.length) saveHistory();
+        } catch { uploadHistory = []; }
+    }
+    function saveHistory() {
+        try { localStorage.setItem('upload_history', JSON.stringify(uploadHistory)); } catch {}
+    }
+    function formatTime(ts) {
+        const d = new Date(ts);
+        return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function renderHistory() {
+        historyList.innerHTML = '';
+        if (uploadHistory.length === 0) {
+            historyList.innerHTML = '<div class="history-empty">尚無發送紀錄</div>';
+            return;
+        }
+        const reversed = [...uploadHistory].reverse();
+        const limit = historyExpanded ? reversed.length : Math.min(3, reversed.length);
+        for (let ri = 0; ri < limit; ri++) {
+            const item = reversed[ri];
+            const idx = uploadHistory.length - 1 - ri;
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            const icon = item.type === 'url' ? 'ti-link' : 'ti-photo';
+            const label = item.text ? (item.type === 'url' ? ` ${item.text}` : ` 「${item.text}」`) : '';
+            div.innerHTML = `
+                ${item.thumb
+                    ? `<img src="${item.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0;">`
+                    : `<i class="ti ${icon} hi-icon" aria-hidden="true"></i>`
+                }
+                <span class="hi-text">[${formatTime(item.ts)}]${label}</span>
+                <button class="hi-del" data-idx="${idx}" title="撤回這則 Discord 訊息">
+                    <i class="ti ti-arrow-back-up" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>撤回
+                </button>`;
+            historyList.appendChild(div);
+        }
+        if (uploadHistory.length > 3) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'clear-btn';
+            toggleBtn.textContent = historyExpanded ? '收起' : `顯示全部 ${uploadHistory.length} 筆`;
+            toggleBtn.style.display = 'block';
+            toggleBtn.style.margin = '10px auto 0';
+            toggleBtn.style.textAlign = 'center';
+            toggleBtn.addEventListener('click', () => {
+                historyExpanded = !historyExpanded;
+                renderHistory();
+            });
+            historyList.appendChild(toggleBtn);
+        }
+        historyList.querySelectorAll('.hi-del').forEach(b =>
+            b.addEventListener('click', () => deleteImage(+b.dataset.idx))
+        );
+    }
+
+    async function deleteImage(index) {
+        const item = uploadHistory[index];
+        if (!item || !item.id || !confirm('確定要撤回這則訊息嗎？')) return;
+        try {
+            const res = await fetch(`/api/send?messageId=${item.id}`, {
+                method: 'DELETE', headers: { 'x-access-token': 'change-me-to-your-own-token' }
+            });
+            if (res.ok) {
+                uploadHistory.splice(index, 1); saveHistory(); renderHistory();
+                setStatus('ok', '已成功撤回');
+            } else {
+                const e = await res.json();
+                setStatus('err', '撤回失敗：' + (e.error || '未知錯誤'));
+            }
+        } catch { setStatus('err', '網路錯誤，無法連線後端'); }
+    }
+
+    function setStatus(type, msg) {
+        statusDiv.className = 'status ' + (type || '');
+        statusDiv.textContent = msg;
+    }
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    }
+
+    captionInput.addEventListener('compositionstart', () => isComposing = true);
+    captionInput.addEventListener('compositionend', () => {
+        isComposing = false;
+        charCount.textContent = captionInput.value.length + '/50';
+        autoResize(captionInput);
+    });
+    captionInput.addEventListener('input', () => {
+        if (!isComposing) charCount.textContent = captionInput.value.length + '/50';
+        autoResize(captionInput);
+    });
+    urlCaptionInput.addEventListener('compositionstart', () => isComposing = true);
+    urlCaptionInput.addEventListener('compositionend', () => {
+        isComposing = false;
+        urlCharCount.textContent = urlCaptionInput.value.length + '/50';
+        autoResize(urlCaptionInput);
+    });
+    urlCaptionInput.addEventListener('input', () => {
+        if (!isComposing) urlCharCount.textContent = urlCaptionInput.value.length + '/50';
+        autoResize(urlCaptionInput);
+    });
+
+    function handleFile(file) {
+        if (!file) return;
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            setStatus('err', '僅支援靜態圖片（JPEG / PNG / WebP）'); return;
+        }
+        currentFile = file;
+        mosaicApplied = false;
+
+        const img = new Image();
+        img.onload = () => {
+            const MAX_SIZE = 2048;
+            let w = img.naturalWidth, h = img.naturalHeight;
+            if (w > MAX_SIZE || h > MAX_SIZE) {
+                const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+            }
+            previewCanvas.width = w;
+            previewCanvas.height = h;
+
+            // 計算 Canvas 顯示尺寸（維持比例、不超過容器）
+            const wrap = previewContainer.querySelector('.preview-img-wrap');
+            const maxW = wrap.clientWidth;
+            const maxH = window.innerHeight * 0.55;
+            let dispW = w, dispH = h;
+            const ratio = dispW / dispH;
+            if (dispW > maxW) { dispW = maxW; dispH = dispW / ratio; }
+            if (dispH > maxH) { dispH = maxH; dispW = dispH * ratio; }
+            previewCanvas.style.width = Math.round(dispW) + 'px';
+            previewCanvas.style.height = Math.round(dispH) + 'px';
+
+            previewCtx.drawImage(img, 0, 0);
+
+            offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = w;
+            offscreenCanvas.height = h;
+            offscreenCanvas.getContext('2d').drawImage(img, 0, 0);
+
+            originalCanvas = document.createElement('canvas');
+            originalCanvas.width = img.naturalWidth;
+            originalCanvas.height = img.naturalHeight;
+            originalCtx = originalCanvas.getContext('2d');
+            originalCtx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+            originalImageDataUrl = originalCanvas.toDataURL('image/png');
+
+            URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
+
+        dropArea.style.display = 'none';
+        previewContainer.style.display = 'block';
+        setStatus('', '');
+    }
+
+    function resetPreview() {
+        currentFile = null; offscreenCanvas = null; mosaicApplied = false;
+        originalCanvas = null; originalCtx = null; originalImageDataUrl = null;
+        previewCanvas.width = 0; previewCanvas.height = 0;
+        captionInput.value = ''; charCount.textContent = '0/50'; captionInput.style.height = 'auto';
+        previewContainer.style.display = 'none'; dropArea.style.display = 'block';
+    }
+
+    function enterUrlMode(url) {
+        currentUrl = url;
+        dropArea.style.display = 'none';
+        urlPreviewContainer.style.display = 'block';
+        urlPreviewImage.style.display = 'none'; urlPreviewImage.src = '';
+        urlCaptionInput.value = ''; urlCharCount.textContent = '0/50'; urlCaptionInput.style.height = 'auto';
+        setStatus('', '');
+
+        const isPximg = /i\.pximg\.net/i.test(url);
+        currentUrlPlatform = isPximg ? 'pximg' : 'Twitter/X';
+        urlPlatform.textContent = isPximg ? 'Pixiv' : 'Twitter/X';
+        urlSpoiler.checked = true; updateUrlHint();
+
+        urlLoading.style.display = 'block';
+        if (isPximg) {
+            urlLoading.innerHTML = '<i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px"></i>載入預覽中...';
+            fetchPreview(url);
+        } else {
+            urlLoading.innerHTML = `<i class="ti ti-link" style="font-size:18px;display:block;margin-bottom:6px"></i><span style="font-size:12px;word-break:break-all;color:#72767d">${url}</span>`;
+        }
+    }
+
+    async function fetchPreview(url) {
+        try {
+            const res = await fetch('/api/preview', {
+                method: 'POST',
+                headers: { 'x-access-token': 'change-me-to-your-own-token', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url }),
+            });
+            if (res.ok) {
+                const blob = await res.blob();
+                const ou = URL.createObjectURL(blob);
+                urlPreviewImage.src = ou;
+                urlPreviewImage.onload = () => {
+                    urlPreviewImage.style.display = 'block';
+                    urlLoading.style.display = 'none';
+                    URL.revokeObjectURL(ou);
+                };
+                urlPreviewImage.onerror = () => {
+                    urlLoading.innerHTML = '<i class="ti ti-photo-off" style="font-size:22px;display:block;margin-bottom:6px"></i>預覽圖片載入失敗';
+                };
+            } else {
+                const e = await res.json();
+                urlLoading.innerHTML = `<i class="ti ti-alert-circle" style="font-size:22px;display:block;margin-bottom:6px"></i>${e.error || '載入失敗'}`;
+            }
+        } catch {
+            urlLoading.innerHTML = '<i class="ti ti-wifi-off" style="font-size:22px;display:block;margin-bottom:6px"></i>網路錯誤，無法連線後端';
+        }
+    }
+
+    function updateUrlHint() {
+        const s = urlSpoiler.checked;
+        if (currentUrlPlatform === 'Twitter/X') {
+            urlModeHint.textContent = s ? '會下載圖片並以暴雷附件送出' : '直接傳送網址，Discord 會自動顯示預覽';
+        } else {
+            urlModeHint.textContent = s ? '會下載圖片並以暴雷附件送出' : '只發送裸網址';
+        }
+    }
+
+    function cancelUrlMode() {
+        currentUrl = null; currentUrlPlatform = '';
+        urlPreviewImage.src = ''; urlCaptionInput.value = '';
+        urlCaptionInput.style.height = 'auto';
+        urlPreviewContainer.style.display = 'none'; dropArea.style.display = 'block';
+        setStatus('', ''); urlModeHint.textContent = '';
+    }
+
+    function getCanvasPos(e) {
+        const rect = previewCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (previewCanvas.width / rect.width),
+            y: (clientY - rect.top) * (previewCanvas.height / rect.height),
+        };
+    }
+
+    function applyMosaic(cx, cy) {
+        if (!offscreenCanvas) return;
+        const R = parseInt(brushSizeInput.value);
+        const rect = previewCanvas.getBoundingClientRect();
+        const scale = previewCanvas.width / rect.width;
+        const B = Math.max(1, Math.round(parseInt(blockSizeInput.value) * scale));
+        const w = previewCanvas.width, h = previewCanvas.height;
+        const srcCtx = offscreenCanvas.getContext('2d');
+        const srcData = srcCtx.getImageData(0, 0, w, h).data;
+
+        const startX = Math.max(0, Math.floor((cx - R) / B) * B);
+        const endX   = Math.min(w, Math.ceil((cx + R) / B) * B);
+        const startY = Math.max(0, Math.floor((cy - R) / B) * B);
+        const endY   = Math.min(h, Math.ceil((cy + R) / B) * B);
+
+        for (let gy = startY; gy < endY; gy += B) {
+            for (let gx = startX; gx < endX; gx += B) {
+                const bcx = gx + B / 2, bcy = gy + B / 2;
+                if ((bcx - cx) ** 2 + (bcy - cy) ** 2 > R * R) continue;
+
+                let tr = 0, tg = 0, tb = 0, count = 0;
+                const my = Math.min(gy + B, h), mx = Math.min(gx + B, w);
+                for (let py = gy; py < my; py++) {
+                    for (let px = gx; px < mx; px++) {
+                        const idx = (py * w + px) * 4;
+                        tr += srcData[idx];
+                        tg += srcData[idx + 1];
+                        tb += srcData[idx + 2];
+                        count++;
+                    }
+                }
+                previewCtx.fillStyle = `rgb(${(tr/count)|0},${(tg/count)|0},${(tb/count)|0})`;
+                previewCtx.fillRect(gx, gy, B, B);
+            }
+        }
+        // 同步到 originalCanvas（原始尺寸）
+        if (originalCanvas) {
+            const origScale = originalCanvas.width / previewCanvas.width;
+            const origB = Math.max(1, Math.round(B * origScale));
+            const origSrcData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+            const origStartX = Math.max(0, Math.floor((cx - R) / B) * B);
+            const origStartY = Math.max(0, Math.floor((cy - R) / B) * B);
+            const origEndX = Math.min(w, Math.ceil((cx + R) / B) * B);
+            const origEndY = Math.min(h, Math.ceil((cy + R) / B) * B);
+            for (let gy = origStartY; gy < origEndY; gy += B) {
+                for (let gx = origStartX; gx < origEndX; gx += B) {
+                    const bcx = gx + B / 2, bcy = gy + B / 2;
+                    if ((bcx - cx) ** 2 + (bcy - cy) ** 2 > R * R) continue;
+                    const oGx = Math.round(gx * origScale);
+                    const oGy = Math.round(gy * origScale);
+                    const oB = origB;
+                    let r = 0, g = 0, b = 0, count = 0;
+                    for (let py = oGy; py < oGy + oB && py < originalCanvas.height; py++) {
+                        for (let px = oGx; px < oGx + oB && px < originalCanvas.width; px++) {
+                            const i = (py * originalCanvas.width + px) * 4;
+                            r += origSrcData.data[i];
+                            g += origSrcData.data[i + 1];
+                            b += origSrcData.data[i + 2];
+                            count++;
+                        }
+                    }
+                    if (count > 0) {
+                        originalCtx.fillStyle = `rgb(${Math.round(r/count)},${Math.round(g/count)},${Math.round(b/count)})`;
+                        originalCtx.fillRect(oGx, oGy, oB, oB);
+                    }
+                }
+            }
+        }
+        mosaicApplied = true;
+    }
+
+    function clearMosaic() {
+        if (!offscreenCanvas) return;
+        previewCtx.drawImage(offscreenCanvas, 0, 0);
+        if (originalCanvas && originalImageDataUrl) {
+            const img2 = new Image();
+            img2.onload = () => {
+                originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+                originalCtx.drawImage(img2, 0, 0);
+            };
+            img2.src = originalImageDataUrl;
+        }
+        mosaicApplied = false;
+    }
+
+    function updateCursor(e) {
+        const canvasRect = previewCanvas.getBoundingClientRect();
+        const wrapRect = previewCanvas.parentElement.getBoundingClientRect();
+        const clientX = e.clientX, clientY = e.clientY;
+        const R = parseInt(brushSizeInput.value);
+        const scale = canvasRect.width / previewCanvas.width;
+        const Rdisp = R * scale;
+        brushCursor.style.width = (Rdisp * 2) + 'px';
+        brushCursor.style.height = (Rdisp * 2) + 'px';
+        brushCursor.style.left = (clientX - wrapRect.left - Rdisp) + 'px';
+        brushCursor.style.top  = (clientY - wrapRect.top  - Rdisp) + 'px';
+    }
+
+    previewCanvas.addEventListener('mousedown',  e => { isPainting = true;  brushCursor.style.display = 'none'; const p = getCanvasPos(e); applyMosaic(p.x, p.y); });
+    previewCanvas.addEventListener('mousemove',  e => { updateCursor(e); if (isPainting) { const p = getCanvasPos(e); applyMosaic(p.x, p.y); } });
+    previewCanvas.addEventListener('mouseup',    e => { isPainting = false; brushCursor.style.display = 'block'; updateCursor(e); });
+    previewCanvas.addEventListener('mouseenter', e => { brushCursor.style.display = 'block'; updateCursor(e); });
+    previewCanvas.addEventListener('mouseleave', () => { isPainting = false; brushCursor.style.display = 'none'; });
+    previewCanvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = true;  brushCursor.style.display = 'none'; const p = getCanvasPos(e); applyMosaic(p.x, p.y); });
+    previewCanvas.addEventListener('touchmove',  e => { e.preventDefault(); if (isPainting) { const p = getCanvasPos(e); applyMosaic(p.x, p.y); } });
+    previewCanvas.addEventListener('touchcancel', () => { isPainting = false; brushCursor.style.display = 'none'; });
+    previewCanvas.addEventListener('touchend',   e => { isPainting = false; brushCursor.style.display = 'block'; const t = e.changedTouches[0]; if (t) updateCursor({ clientX: t.clientX, clientY: t.clientY }); });
+
+    clearMosaicBtn.addEventListener('click', clearMosaic);
+
+    document.getElementById('save-local-btn').addEventListener('click', () => {
+        if (!originalCanvas) return;
+        originalCanvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mosaic_image.png';
+            a.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    });
+
+    document.getElementById('copy-local-btn').addEventListener('click', async () => {
+        if (!originalCanvas) return;
+        const blob = await new Promise(resolve => originalCanvas.toBlob(resolve, 'image/png'));
+
+        // 嘗試複製到剪貼簿
+        if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                setStatus('ok', '已複製到剪貼簿！');
+                return;
+            } catch (e) {
+                // 複製失敗，降級為下載
+            }
+        }
+
+        // Fallback：直接下載
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mosaic_image.png';
+        a.click();
+        URL.revokeObjectURL(url);
+        setStatus('ok', '裝置不支援複製，已改為下載圖片');
+    });
+
+    async function confirmSend() {
+        if (!currentFile) return;
+        if (isComposing) await new Promise(r => captionInput.addEventListener('compositionend', r, { once: true }));
+        const formData = new FormData();
+        if (mosaicApplied) {
+            const blob = await new Promise(resolve => previewCanvas.toBlob(resolve, 'image/jpeg', 0.92));
+            if (!blob) { setStatus('err', '圖片處理失敗'); return; }
+            formData.append('file', blob, 'SPOILER_image.jpg');
+        } else {
+            formData.append('file', currentFile, 'SPOILER_image.png');
+        }
+        const caption = captionInput.value.trim();
+        if (caption) formData.append('content', caption);
+        confirmBtn.disabled = cancelBtn.disabled = captionInput.disabled = true;
+        setStatus('', '發送中，請稍候...');
+        try {
+            const res = await fetch('/api/send', {
+                method: 'POST', headers: { 'x-access-token': 'change-me-to-your-own-token' }, body: formData
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const thumb = generateThumb(previewCanvas);
+                uploadHistory.push({ id: data.id, ts: Date.now(), text: caption, thumb });
+                saveHistory(); renderHistory();
+                setStatus('ok', '發送成功！（已自動暴雷）'); resetPreview();
+            } else {
+                const e = await res.json();
+                setStatus('err', '發送失敗：' + (e.error || '未知錯誤'));
+            }
+        } catch { setStatus('err', '連線後端發生錯誤'); }
+        confirmBtn.disabled = cancelBtn.disabled = captionInput.disabled = false;
+    }
+
+    async function confirmUrlSend() {
+        if (!currentUrl) return;
+        if (isComposing) await new Promise(r => urlCaptionInput.addEventListener('compositionend', r, { once: true }));
+        const spoiler = urlSpoiler.checked;
+        const caption = urlCaptionInput.value.trim();
+        urlConfirmBtn.disabled = urlCancelBtn.disabled = urlCaptionInput.disabled = true;
+        setStatus('', '發送中，請稍候...');
+        try {
+            const body = { url: currentUrl, spoiler };
+            if (caption) body.content = caption;
+            const res = await fetch('/api/fetch-url', {
+                method: 'POST',
+                headers: { 'x-access-token': 'change-me-to-your-own-token', 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const label = currentUrlPlatform === 'pximg' ? 'Pixiv 圖片' : 'Twitter/X';
+                const thumb = (urlPreviewImage.style.display !== 'none' && urlPreviewImage.src)
+                    ? generateThumb(urlPreviewImage)
+                    : null;
+                uploadHistory.push({ id: data.id, ts: Date.now(), text: label, type: 'url', thumb });
+                saveHistory(); renderHistory();
+                setStatus('ok', spoiler ? '發送成功！（已自動暴雷）' : '發送成功！');
+                cancelUrlMode();
+            } else {
+                const e = await res.json();
+                setStatus('err', '發送失敗：' + (e.error || '未知錯誤'));
+            }
+        } catch { setStatus('err', '連線後端發生錯誤'); }
+        urlConfirmBtn.disabled = urlCancelBtn.disabled = urlCaptionInput.disabled = false;
+    }
+
+    // Drop zone events
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value = ''; });
+
+    let dragCounter = 0;
+    dropArea.addEventListener('dragenter', e => { e.preventDefault(); dragCounter++; if (dragCounter === 1) dropArea.classList.add('drag-over'); });
+    dropArea.addEventListener('dragover', e => e.preventDefault());
+    dropArea.addEventListener('dragleave', () => { dragCounter--; if (!dragCounter) dropArea.classList.remove('drag-over'); });
+    dropArea.addEventListener('drop', e => {
+        e.preventDefault(); dragCounter = 0; dropArea.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+
+    document.addEventListener('paste', e => {
+        if (document.activeElement === captionInput || document.activeElement === urlCaptionInput) return;
+        for (const item of e.clipboardData.items) {
+            if (['image/jpeg', 'image/png', 'image/webp'].includes(item.type)) {
+                const f = item.getAsFile(); if (f) { handleFile(f); return; }
+            }
+        }
+        const text = e.clipboardData.getData('text/plain').trim();
+        if (/twitter\.com\/\w+\/status\/\d+|x\.com\/\w+\/status\/\d+|i\.pximg\.net\/.+\.(?:jpg|jpeg|png|webp|gif)/i.test(text)) {
+            enterUrlMode(text); return;
+        }
+        if (text) setStatus('err', '不支援的網址，目前支援 Twitter/X 貼文和 Pixiv 圖片連結（右鍵複製圖片網址）');
+        else setStatus('err', '剪貼簿內容不支援，請貼上 JPEG / PNG / WebP 圖片或支援的網址');
+    });
+
+    confirmBtn.addEventListener('click', confirmSend);
+    cancelBtn.addEventListener('click', () => {
+        clearMosaic();
+        offscreenCanvas = null;
+        resetPreview();
+    });
+    urlConfirmBtn.addEventListener('click', confirmUrlSend);
+    urlCancelBtn.addEventListener('click', cancelUrlMode);
+    urlSpoiler.addEventListener('change', updateUrlHint);
+    clearAllBtn.addEventListener('click', () => {
+        if (!uploadHistory.length || !confirm('確定要清除全部發送紀錄嗎？（Discord 上的訊息不受影響）')) return;
+        uploadHistory = []; saveHistory(); renderHistory();
+    });
+
+    fetch('/api/version')
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('version-stamp').textContent = 'v' + d.version;
+        })
+        .catch(() => {
+            document.getElementById('version-stamp').textContent = '';
+        });
+
+    loadHistory();
+    renderHistory();
+</script>
+</body>
+</html>

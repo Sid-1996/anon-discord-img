@@ -1,0 +1,36 @@
+{
+  "rewrites": [
+    { "source": "/api/send", "destination": "/api/send.js" },
+    { "source": "/api/preview", "destination": "/api/preview.js" },
+    { "source": "/api/fetch-url", "destination": "/api/fetch-url.js" },
+    { "source": "/api/version", "destination": "/api/version.js" }
+  ],
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" }
+      ]
+    },
+    {
+      "source": "/api/send",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/api/fetch-url",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/api/version",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}
