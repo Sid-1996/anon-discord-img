@@ -11,17 +11,18 @@
 
 ### 💬 方法一：讓 AI 帶你一步一步做 (Guided Setup via AI Chat)
 
-> 💡 **推薦工具：[Google Gemini](https://gemini.google.com/app)**（免費，有桌面 App）
-> Gemini 支援**視覺模型**——你可以直接把螢幕截圖丟給它，它會看著你的畫面告訴你下一步要點哪裡，比純文字教學直觀很多。
+> 💡 **推薦工具：[Google App for Desktop](https://search.google/google-app/desktop/)**（Windows 免費下載）
+> 這款 App 內建**螢幕分享 + Google Lens**，按下 `Alt + Space` 就能叫出來，直接讓 AI 看你的整個螢幕或特定視窗，即時告訴你下一步要點哪裡——不需要截圖、不需要切換視窗，AI 看著你的畫面教你操作。
 >
-> 💡 **Recommended: [Google Gemini](https://gemini.google.com/app)** (free, desktop app available)
-> Gemini supports **vision** — you can paste screenshots directly into the chat and it will look at your screen to guide you, far more intuitive than text-only instructions.
+> 💡 **Recommended: [Google App for Desktop](https://search.google/google-app/desktop/)** (free, Windows only)
+> Press `Alt + Space` to launch it anytime. It has **screen sharing + Lens** built in — just let the AI look at your screen or any specific window and it will tell you exactly what to click next. No screenshots needed, no tab switching.
 >
-> 下載桌面版 / Download desktop app: [gemini.google.com/app](https://gemini.google.com/app)
+> ⚠️ 目前僅支援 Windows 10+，介面為英文。非 Windows 用戶可改用 [Google Gemini](https://gemini.google.com/app)（截圖貼入對話即可）。
+> ⚠️ Windows 10+ only, English interface. Non-Windows users can use [Google Gemini](https://gemini.google.com/app) instead — just paste screenshots into the chat.
 
-把下面這段文字複製，貼進 Gemini 或任何 AI 對話框，讓它帶你完成整個部署流程。遇到看不懂的畫面，直接截圖貼給它問：
+把下面這段文字複製，貼進 Google App 或任何 AI 對話框，讓它帶你完成整個部署流程。遇到看不懂的畫面，直接開螢幕分享或截圖丟給它問：
 
-Copy the prompt below and paste it into Gemini or any AI chat. If you get stuck on any screen, just take a screenshot and paste it into the chat to ask:
+Copy the prompt below into Google App or any AI chat. If you get stuck, use screen share or paste a screenshot and ask:
 
 ```
 我想部署一個開源工具，GitHub 網址是 https://github.com/Sid-1996/anon-discord-img
