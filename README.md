@@ -1,7 +1,6 @@
-# anon-discord-img / 匿名 Discord 發圖工具
+# anon-discord-img
 
-> 匿名上傳圖片到 Discord，自動暴雷遮罩 • 不需登入、不需額外點擊
-> Upload images to Discord with auto-spoiler — no login, no extra clicks.
+> 匿名上傳圖片到 Discord，自動暴雷遮罩 • Upload images to Discord with auto-spoiler
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
@@ -10,7 +9,8 @@
 
 ---
 
-<details open>
+<div style="display: flex; gap: 12px; align-items: flex-start;">
+<details style="flex: 1; min-width: 0;">
 <summary><b>🌏 中文</b></summary>
 
 - [🆕 完全不懂技術？讓 AI 幫你搞定](#-完全不懂技術讓-ai-幫你搞定)
@@ -225,8 +225,7 @@ vercel dev
 MIT — 自由使用、修改、商用。
 
 </details>
-
-<details>
+<details style="flex: 1; min-width: 0;">
 <summary><b>🌏 English</b></summary>
 
 - [🆕 No Tech Skills? Let AI Do It](#-no-tech-skills-let-ai-do-it)
@@ -438,3 +437,4 @@ Within 3 days of sending, find the message in the send history list and click **
 MIT — free to use, modify, and distribute.
 
 </details>
+</div>
