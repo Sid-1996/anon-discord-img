@@ -1,6 +1,6 @@
 import { formidable } from 'formidable';
 import fs from 'fs';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 
 export const config = {
   api: {
@@ -9,6 +9,10 @@ export const config = {
 };
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || 'change-me-to-your-own-token';
+
+const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+  ? new Redis({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
+  : null;
 
 export default async function handler(req, res) {
   if (req.headers['x-access-token'] !== ACCESS_TOKEN) {
@@ -22,16 +26,18 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    try {
-      const count = await kv.incr(`rate:${ip}`);
-      if (count === 1) {
-        await kv.expire(`rate:${ip}`, 60);
+    if (redis) {
+      try {
+        const count = await redis.incr(`rate:${ip}`);
+        if (count === 1) {
+          await redis.expire(`rate:${ip}`, 60);
+        }
+        if (count > 10) {
+          return res.status(429).json({ error: '發送太過頻繁，請稍後再試' });
+        }
+      } catch {
+        // Redis not configured — skip rate limiting
       }
-      if (count > 10) {
-        return res.status(429).json({ error: '發送太過頻繁，請稍後再試' });
-      }
-    } catch {
-      // KV not configured — skip rate limiting
     }
 
     const form = formidable({ maxFileSize: 8 * 1024 * 1024 });

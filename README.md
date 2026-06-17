@@ -176,7 +176,7 @@ vercel dev
 |---|---|---|
 | `DISCORD_WEBHOOK_URL` | ✅ | Discord Webhook 完整網址 |
 | `ACCESS_TOKEN` | ❌ 選填 | API 存取密碼（預設：`change-me-to-your-own-token`） |
-| `KV_URL` / `KV_REST_API_URL` / `KV_REST_API_TOKEN` | ❌ 選填 | Vercel KV（分散式限流，多區域部署才需要） |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | ❌ 選填 | Upstash Redis（分散式限流，多區域部署才需要） |
 
 ---
 
@@ -188,7 +188,7 @@ vercel dev
 | **大小限制** | 單檔最大 8MB |
 | **Magic byte 驗證** | 伺服器檢查真實檔案類型（JPEG/PNG/WebP），不看副檔名 |
 | **@everyone / @here 消毒** | 自動屏蔽，避免被濫用 |
-| **限流** | 每 IP 每 60 秒 10 次（有 KV 則啟用分散式，無 KV 則略過） |
+| **限流** | 每 IP 每 60 秒 10 次（有 Redis 則啟用分散式，無則略過） |
 | **暫存檔清理** | 處理完立即刪除 |
 
 ---
@@ -388,7 +388,7 @@ Within 3 days of sending, find the message in the send history list and click **
 |---|---|---|
 | `DISCORD_WEBHOOK_URL` | ✅ Yes | Full Discord Webhook URL |
 | `ACCESS_TOKEN` | ❌ Optional | API access password (default: `change-me-to-your-own-token`) |
-| `KV_URL` / `KV_REST_API_URL` / `KV_REST_API_TOKEN` | ❌ Optional | Vercel KV (distributed rate limiting, only needed for multi-region) |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | ❌ Optional | Upstash Redis (distributed rate limiting, only needed for multi-region) |
 
 ---
 
@@ -400,7 +400,7 @@ Within 3 days of sending, find the message in the send history list and click **
 | **Size limit** | Max 8MB per file |
 | **Magic byte validation** | Server verifies real file type (JPEG/PNG/WebP), ignores extension |
 | **@everyone / @here sanitization** | Automatically stripped to prevent abuse |
-| **Rate limit** | 10 requests per 60 seconds per IP (distributed with KV, skipped without) |
+| **Rate limit** | 10 requests per 60 seconds per IP (distributed with Redis, skipped without) |
 | **Temp file cleanup** | Deleted immediately after processing |
 
 ---
