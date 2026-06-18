@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>匿名 Discord 發圖工具 · 自動暴雷遮罩 anon-discord-img</title>
-    <meta name="description" content="免費匿名 Discord 圖片上傳工具，自動加上暴雷遮罩（SPOILER_）。支援拖曳上傳、局部馬賽克筆刷、Twitter/X 貼文連結與 Pixiv 圖片網址。免登入、免安裝、一鍵部署到 Vercel。">
-    <meta name="keywords" content="Discord,匿名,圖片上傳,暴雷,spoiler,遮罩,馬賽克,Webhook,Pixiv,Twitter,X,Vercel,免費,工具">
+    <title>anon-discord-img · 匿名 Discord 發圖工具｜自動暴雷遮罩</title>
+    <meta name="description" content="免費開源匿名 Discord 圖片上傳工具，自動加上暴雷遮罩（SPOILER_）。支援拖曳上傳、局部馬賽克筆刷、Twitter/X 貼文連結與 Pixiv 圖片網址。免登入、免安裝、一鍵部署到 Vercel。">
+    <meta name="keywords" content="Discord,匿名,圖片上傳,暴雷,spoiler,遮罩,馬賽克,Webhook,Pixiv,Twitter,X,Vercel,免費,開源,工具">
     <meta name="author" content="anon-discord-img">
     <meta name="robots" content="index, follow">
 
     <meta property="og:title" content="anon-discord-img · 匿名 Discord 發圖工具">
-    <meta property="og:description" content="上傳圖片到 Discord 頻道，自動加上暴雷遮罩 — 不需登入、不需額外點擊。支援馬賽克筆刷與 Twitter/Pixiv 連結。">
+    <meta property="og:description" content="免費開源工具：上傳圖片到 Discord 頻道，自動加上暴雷遮罩。支援馬賽克筆刷與 Twitter/Pixiv 連結。不需登入、一鍵部署。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sid-1996.github.io/anon-discord-img/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="anon-discord-img · 匿名 Discord 發圖工具">
-    <meta name="twitter:description" content="匿名上傳圖片到 Discord，自動暴雷遮罩。支援馬賽克筆刷、Twitter/X 貼文與 Pixiv 圖片網址。">
+    <meta name="twitter:description" content="免費開源：匿名 Discord 圖片上傳，自動暴雷遮罩。支援馬賽克筆刷、Twitter/X 與 Pixiv 連結。">
 
     <link rel="canonical" href="https://sid-1996.github.io/anon-discord-img/">
 
@@ -39,16 +39,16 @@
     },{
       "@context": "https://schema.org",
       "@type": "HowTo",
-      "name": "使用匿名 Discord 發圖工具",
-      "description": "三步驟快速上手：部署、設定 Webhook、開始發圖",
-      "totalTime": "PT5M",
+      "name": "部署與使用匿名 Discord 發圖工具",
+      "description": "三步驟快速上手：取得 Webhook、部署到 Vercel、開始發圖",
+      "totalTime": "PT10M",
       "step": [
-        { "@type": "HowToStep", "position": 1, "name": "一鍵部署到 Vercel",
-          "text": "點擊 README 的 Deploy 按鈕，將專案部署到 Vercel（免費）。" },
-        { "@type": "HowToStep", "position": 2, "name": "設定 Discord Webhook",
-          "text": "在 Discord 頻道建立 Webhook，將網址填入環境變數 DISCORD_WEBHOOK_URL。" },
-        { "@type": "HowToStep", "position": 3, "name": "開始發圖",
-          "text": "拖曳圖片、貼上連結，或從檔案選取器上傳，按發送即可在 Discord 以暴雷遮罩顯示。" }
+        { "@type": "HowToStep", "position": 1, "name": "取得 Discord Webhook",
+          "text": "在 Discord 頻道按齒輪 → 整合 → Webhook → 新增 Webhook，複製網址。" },
+        { "@type": "HowToStep", "position": 2, "name": "一鍵部署到 Vercel",
+          "text": "點擊專案 README 的 Deploy 按鈕，填入 Webhook 網址與自訂 Token，完成部署。" },
+        { "@type": "HowToStep", "position": 3, "name": "開始匿名發圖",
+          "text": "打開你的 Vercel 網址，拖曳圖片、貼上連結或選取檔案，按發送即可。" }
       ]
     }]
     </script>
@@ -57,1013 +57,366 @@
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 
     <style>
-        /* ── Reset ── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        /* ── Layout ── */
+        html { scroll-behavior: smooth; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 640px; margin: 0 auto; padding: 0 16px 32px;
-            background-color: #2f3136; color: #dcddde;
+            background: #2f3136; color: #dcddde;
             display: flex; flex-direction: column; min-height: 100vh;
         }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 20px; width: 100%; }
         main { flex: 1; }
+        a { color: #7289da; text-decoration: none; }
+        a:hover { color: #8ea1e1; }
+        code {
+            background: #232427; padding: 2px 6px; border-radius: 4px;
+            font-size: 0.9em; color: #dcddde;
+        }
+        kbd {
+            background: #40444b; border: 0.5px solid #4f545c; border-radius: 4px;
+            padding: 1px 5px; font-size: 0.85em; font-family: inherit;
+        }
 
-        /* ── Header / Nav ── */
         header {
+            padding: 16px 0; border-bottom: 0.5px solid #3a3d44; margin-bottom: 40px;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 0; border-bottom: 0.5px solid #3a3d44; margin-bottom: 20px;
         }
         .logo {
             font-size: 15px; font-weight: 600; color: #fff;
             display: flex; align-items: center; gap: 8px;
         }
         .logo i { color: #7289da; font-size: 20px; }
-        nav { display: flex; align-items: center; gap: 12px; }
-        nav a {
-            font-size: 13px; color: #72767d; text-decoration: none;
-            transition: color 0.15s;
-        }
+        nav { display: flex; align-items: center; gap: 16px; }
+        nav a { font-size: 13px; color: #72767d; transition: color 0.15s; }
         nav a:hover { color: #dcddde; }
 
-        /* ── Hero ── */
-        .hero { text-align: center; margin-bottom: 32px; }
+        .hero { text-align: center; margin-bottom: 48px; }
         .hero h1 {
-            font-size: 26px; font-weight: 600; color: #fff;
-            margin-bottom: 8px; letter-spacing: -0.01em;
+            font-size: 32px; font-weight: 700; color: #fff;
+            margin-bottom: 10px; letter-spacing: -0.02em;
         }
         .hero .tagline {
-            font-size: 14px; color: #72767d; line-height: 1.6;
-            max-width: 480px; margin: 0 auto 16px;
+            font-size: 16px; color: #72767d; line-height: 1.7;
+            max-width: 520px; margin: 0 auto 20px;
         }
-        .hero-badges {
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-            margin-bottom: 6px;
+        .hero .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 8px;
+            background: #404776; border: 0.5px solid #5865f2;
+            color: #c5c8f8; font-size: 15px; font-weight: 500;
+            cursor: pointer; transition: background 0.15s; font-family: inherit;
         }
-        .hero-badges .badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 12px; padding: 5px 11px;
-            border-radius: 99px; border: 0.5px solid #4f545c;
-            background: #292b2f; color: #b9bbbe; white-space: nowrap;
+        .hero .btn-primary:hover { background: #4a5288; color: #c5c8f8; }
+        .hero .btn-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 8px;
+            border: 0.5px solid #4f545c; color: #dcddde;
+            font-size: 15px; font-weight: 500; font-family: inherit;
+            background: transparent; cursor: pointer; transition: background 0.15s;
         }
-        .hero-badges .badge i { font-size: 14px; color: #7289da; }
+        .hero .btn-secondary:hover { background: #40444b; }
+        .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-        /* ── How-to Guide ── */
-        .guide { margin-bottom: 32px; }
-        .guide h2 {
-            font-size: 16px; font-weight: 600; color: #fff;
-            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        .section-title {
+            font-size: 18px; font-weight: 600; color: #fff;
+            margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
         }
-        .guide h2 i { color: #7289da; }
-        .steps { display: flex; flex-direction: column; gap: 8px; }
-        .step {
-            display: flex; align-items: flex-start; gap: 12px;
-            padding: 12px 14px; border-radius: 10px;
+        .section-title i { color: #7289da; }
+
+        .features { margin-bottom: 48px; }
+        .feature-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .feature-card {
+            padding: 16px; border-radius: 10px;
             background: #292b2f; border: 0.5px solid #3a3d44;
         }
-        .step-num {
-            flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
-            background: #404776; color: #c5c8f8;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 600; margin-top: 1px;
+        .feature-card .fc-icon {
+            font-size: 22px; color: #7289da; margin-bottom: 8px; display: block;
         }
-        .step-body { flex: 1; min-width: 0; }
-        .step-body .step-title {
-            font-size: 14px; font-weight: 500; color: #fff; margin-bottom: 2px;
+        .feature-card h3 {
+            font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;
         }
-        .step-body .step-desc {
+        .feature-card p {
             font-size: 13px; color: #72767d; line-height: 1.5;
         }
-        .step-body .step-desc a { color: #7289da; text-decoration: none; }
-        .step-body .step-desc a:hover { text-decoration: underline; }
 
-        .guide-cta {
-            text-align: center; margin-top: 12px;
+        .step-list { margin-bottom: 48px; }
+        .step-item {
+            display: flex; gap: 16px; padding: 18px 0;
+            border-bottom: 0.5px solid #3a3d44;
         }
-        .guide-cta a {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: 13px; color: #7289da; text-decoration: none;
+        .step-item:last-child { border-bottom: none; }
+        .step-num {
+            flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+            background: #404776; color: #c5c8f8;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; margin-top: 2px;
         }
-        .guide-cta a:hover { color: #8ea1e1; }
+        .step-body { flex: 1; min-width: 0; }
+        .step-body h3 {
+            font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px;
+        }
+        .step-body p, .step-body li {
+            font-size: 14px; color: #b9bbbe; line-height: 1.7;
+        }
+        .step-body ol {
+            padding-left: 20px; margin-top: 6px;
+        }
+        .step-body ol li { margin-bottom: 4px; }
+        .step-body .note {
+            font-size: 13px; color: #72767d; margin-top: 8px;
+            padding: 10px 14px; border-radius: 8px;
+            background: #232427; border: 0.5px solid #3a3d44;
+        }
+        .step-body .note i { color: #faa61a; margin-right: 4px; }
 
-        /* ── Tool Section ── */
-        .tool-section { margin-bottom: 24px; }
-
-        /* ── Upload Tool (existing styles) ── */
-        .drop-zone {
-            border: 1.5px dashed #4f545c; border-radius: 12px;
-            padding: 48px 20px; text-align: center; cursor: pointer;
-            transition: background 0.15s, border-color 0.15s;
-            background: #292b2f;
+        .faq { margin-bottom: 48px; }
+        details.faq-item {
+            padding: 14px 0; border-bottom: 0.5px solid #3a3d44;
         }
-        .drop-zone:hover, .drop-zone.drag-over { background: #36393f; border-color: #7289da; }
-        .drop-zone .dz-icon { font-size: 32px; display: block; margin-bottom: 12px; color: #72767d; }
-        .drop-zone .dz-main { font-size: 14px; font-weight: 500; color: #dcddde; margin-bottom: 6px; }
-        .drop-zone .dz-hint { font-size: 12px; color: #72767d; line-height: 1.7; }
-        .drop-zone .dz-hint b { font-weight: 500; color: #a0a4aa; }
-
-        .preview-card {
-            border: 0.5px solid #3a3d44; border-radius: 12px;
-            overflow: hidden; background: #36393f;
+        details.faq-item:first-child { border-top: 0.5px solid #3a3d44; }
+        details.faq-item summary {
+            font-size: 14px; font-weight: 500; color: #fff;
+            cursor: pointer; list-style: none; display: flex;
+            align-items: center; justify-content: space-between;
         }
-        .preview-img-wrap {
-            background: #000; display: flex; align-items: center; justify-content: center;
-            min-height: 200px; max-height: 55vh; overflow: hidden; position: relative;
-            -webkit-user-select: none; user-select: none;
+        details.faq-item summary::-webkit-details-marker { display: none; }
+        details.faq-item summary::after {
+            content: '+'; font-size: 18px; color: #72767d;
+            transition: transform 0.2s;
         }
-        .preview-img-wrap img,
-        .preview-img-wrap canvas { max-width: 100%; max-height: 55vh; object-fit: contain; display: block; }
-        .preview-img-wrap canvas { cursor: none; }
-        #preview-canvas { touch-action: none; -webkit-touch-callout: none; }
-        .brush-cursor {
-            position: absolute; pointer-events: none; z-index: 1;
-            border: 1.5px solid rgba(255,255,255,0.6); border-radius: 50%;
-        }
-        .preview-body { padding: 14px; }
-
-        .caption-wrap { position: relative; margin-bottom: 12px; }
-        .caption-wrap textarea {
-            width: 100%; resize: none; border: 0.5px solid #4f545c; border-radius: 8px;
-            padding: 9px 44px 9px 12px; font-size: 14px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #292b2f; color: #dcddde; outline: none;
-            min-height: 40px; line-height: 1.5; overflow-y: hidden;
-        }
-        .caption-wrap textarea:focus { border-color: #7289da; }
-        .caption-wrap textarea::placeholder { color: #72767d; }
-        .caption-wrap .char {
-            position: absolute; right: 10px; bottom: 10px;
-            font-size: 11px; color: #72767d; pointer-events: none;
+        details.faq-item[open] summary::after { content: '−'; }
+        details.faq-item .faq-answer {
+            font-size: 14px; color: #b9bbbe; line-height: 1.7;
+            padding-top: 10px;
         }
 
-        .btn-row { display: flex; gap: 8px; }
-        .btn {
-            padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
-            cursor: pointer; border: 0.5px solid #4f545c;
-            background: transparent; color: #dcddde;
-            transition: background 0.12s; white-space: nowrap;
-            font-family: inherit;
+        .cta {
+            text-align: center; margin-bottom: 48px;
+            padding: 40px 20px; border-radius: 12px;
+            border: 0.5px solid #3a3d44; background: #292b2f;
         }
-        .btn:hover { background: #40444b; }
-        .btn:active { opacity: 0.75; transform: scale(0.97); }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-        .btn-send {
-            background: #404776; border-color: #5865f2; color: #c5c8f8; flex: 1;
+        .cta h2 {
+            font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px;
         }
-        .btn-send:hover { background: #4a5288; }
+        .cta p {
+            font-size: 14px; color: #72767d; margin-bottom: 18px;
+        }
+        .cta .btn-gh {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 500;
+            background: #24292e; border: 0.5px solid #4f545c; color: #fff;
+            font-family: inherit; cursor: pointer; transition: background 0.15s;
+        }
+        .cta .btn-gh:hover { background: #2c3136; color: #fff; }
 
-        .spoiler-row {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; border-bottom: 0.5px solid #3a3d44;
-        }
-        .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
-        .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-        .toggle .track {
-            position: absolute; inset: 0; border-radius: 10px;
-            background: #4f545c; transition: background 0.2s;
-        }
-        .toggle .thumb {
-            position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
-            border-radius: 50%; background: #dcddde; transition: transform 0.2s;
-            pointer-events: none;
-        }
-        .toggle input:checked + .track { background: #5865f2; }
-        .toggle input:checked ~ .thumb { transform: translateX(16px); }
-        .toggle-label { font-size: 13px; color: #b9bbbe; }
-        .platform-badge {
-            font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px;
-            margin-left: auto; background: #2f3136; border: 0.5px solid #4f545c; color: #72767d;
-        }
-        .mode-hint { font-size: 12px; color: #72767d; padding: 6px 14px 0; min-height: 20px; }
-
-        #url-loading {
-            font-size: 13px; color: #72767d; padding: 40px 20px;
-            text-align: center; width: 100%;
-        }
-
-        .status { margin-top: 12px; font-size: 13px; font-weight: 500; min-height: 20px; text-align: center; }
-        .status.ok { color: #43b581; }
-        .status.err { color: #f04747; }
-
-        .history { margin-top: 24px; }
-        .history-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .history-hdr .hdr-label { font-size: 12px; font-weight: 500; color: #72767d; text-transform: uppercase; letter-spacing: 0.04em; }
-        .clear-btn {
-            font-size: 12px; color: #72767d; background: none;
-            border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px;
-            font-family: inherit;
-        }
-        .clear-btn:hover { background: #40444b; color: #f04747; }
-
-        .history-item {
-            display: flex; align-items: center; gap: 10px; padding: 9px 12px;
-            border-radius: 8px; border: 0.5px solid #3a3d44;
-            margin-bottom: 6px; background: #36393f;
-        }
-        .hi-icon { font-size: 15px; color: #72767d; flex-shrink: 0; }
-        .hi-text { flex: 1; font-size: 13px; color: #b9bbbe; min-width: 0; }
-        .hi-del {
-            font-size: 12px; background: none; border: none; cursor: pointer;
-            color: #72767d; padding: 3px 7px; border-radius: 4px;
-            white-space: nowrap; font-family: inherit;
-        }
-        .hi-del:hover { background: rgba(240,71,71,0.15); color: #f04747; }
-        .hi-del:active { opacity: 0.75; }
-        .history-empty { text-align: center; font-size: 13px; color: #4f545c; padding: 12px 0; }
-
-        .mosaic-bar {
-            display: flex; gap: 14px; align-items: center;
-            padding: 10px 14px; flex-wrap: wrap;
-            background: #2f3136; border-bottom: 0.5px solid #3a3d44;
-        }
-        .mosaic-bar label {
-            font-size: 11px; color: #72767d;
-            display: flex; flex-direction: column; gap: 2px;
-        }
-        .mosaic-bar input[type="range"] { width: 80px; accent-color: #7289da; }
-        .mosaic-bar label span {
-            font-weight: 600;
-            color: #dcddde;
-            margin-left: 4px;
-        }
-        .mosaic-btn {
-            background: #4f545c; border: none; border-radius: 6px;
-            color: #dcddde; padding: 6px 14px; font-size: 12px; cursor: pointer;
-            font-family: inherit; white-space: nowrap;
-        }
-        .mosaic-btn:hover { background: #5d6269; }
-        .mosaic-btn-danger { margin-left: auto; }
-        .mosaic-btn-danger:hover { background: #d83c3e; }
-        .mosaic-btn:active { opacity: 0.75; }
-        .mosaic-tip {
-            width: 100%;
-            font-size: 11px;
-            color: #72767d;
-            margin-top: 6px;
-            line-height: 1.5;
-        }
-
-        input[type="file"] { display: none; }
-
-        /* ── Footer ── */
         footer {
-            text-align: center; padding: 20px 0 8px;
-            border-top: 0.5px solid #3a3d44; margin-top: 12px;
+            text-align: center; padding: 24px 0 16px;
+            border-top: 0.5px solid #3a3d44;
+            font-size: 13px; color: #4f545c;
         }
-        footer a { color: #7289da; text-decoration: none; }
-        footer a:hover { color: #8ea1e1; }
-        footer .version { font-size: 11px; color: #4f545c; margin-top: 6px; user-select: none; }
+        footer a { color: #72767d; }
+        footer a:hover { color: #dcddde; }
+        footer .version { font-size: 11px; margin-top: 6px; }
 
-        /* ── Responsive ── */
-        @media (max-width: 420px) {
-            body { padding: 0 12px 24px; }
-            .hero h1 { font-size: 22px; }
-            .drop-zone { padding: 36px 16px; }
-            .btn { padding: 9px 14px; font-size: 13px; }
-            .mosaic-bar { gap: 10px; padding: 10px 12px; }
-            .mosaic-bar label { font-size: 12px; }
-            .mosaic-bar input[type="range"] { width: 70px; }
-            .mosaic-btn { padding: 7px 10px; font-size: 12px; }
+        @media (max-width: 540px) {
+            .container { padding: 0 14px; }
+            .hero h1 { font-size: 24px; }
+            .hero .tagline { font-size: 14px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .step-item { flex-direction: column; gap: 10px; }
+            .step-num { width: 30px; height: 30px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
 
-<input type="file" id="file-input" accept="image/jpeg,image/png,image/webp">
-
-<header>
+<header class="container">
     <span class="logo"><i class="ti ti-eye-off" aria-hidden="true"></i>anon-discord-img</span>
     <nav>
-        <a href="#guide">關於</a>
-        <a href="#tool">開始使用</a>
+        <a href="#guide">教學</a>
+        <a href="#faq">FAQ</a>
         <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
-            <i class="ti ti-brand-github" style="font-size:16px;vertical-align:-2px" aria-hidden="true"></i>
+            <i class="ti ti-brand-github" style="font-size:17px;vertical-align:-2px" aria-hidden="true"></i>
         </a>
     </nav>
 </header>
 
-<main>
+<main class="container">
     <!-- ── Hero ── -->
     <section class="hero">
-        <h1>匿名 Discord 發圖工具</h1>
+        <h1>anon-discord-img</h1>
         <p class="tagline">
-            上傳圖片到 Discord 頻道，自動加上暴雷遮罩 — 不需登入、不需額外點擊。<br>
-            支援拖曳上傳、局部馬賽克筆刷、社群媒體連結。
+            免費開源工具 — 匿名上傳圖片到 Discord 頻道，<strong>自動加上暴雷遮罩</strong>。<br>
+            不需登入、不需註冊，<strong>一鍵部署</strong>到 Vercel 即可開始使用。
         </p>
-        <div class="hero-badges">
-            <span class="badge"><i class="ti ti-cloud-upload" aria-hidden="true"></i> 拖曳 / 貼上</span>
-            <span class="badge"><i class="ti ti-masks-theater" aria-hidden="true"></i> 自動暴雷</span>
-            <span class="badge"><i class="ti ti-brush" aria-hidden="true"></i> 局部馬賽克</span>
-            <span class="badge"><i class="ti ti-brand-twitter" aria-hidden="true"></i> Twitter / X</span>
-            <span class="badge"><i class="ti ti-brand-pixiv" aria-hidden="true"></i> Pixiv</span>
-            <span class="badge"><i class="ti ti-history" aria-hidden="true"></i> 3天內可撤回</span>
-        </div>
-    </section>
-
-    <!-- ── How-to Guide ── -->
-    <section class="guide" id="guide">
-        <h2><i class="ti ti-flag" aria-hidden="true"></i> 三步驟快速上手</h2>
-        <div class="steps">
-            <div class="step">
-                <span class="step-num" aria-hidden="true">1</span>
-                <div class="step-body">
-                    <div class="step-title">一鍵部署到 Vercel</div>
-                    <div class="step-desc">
-                        點擊 <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">GitHub 專案</a> 的 Deploy 按鈕，
-                        填入 <strong>Discord Webhook</strong> 網址與自訂 Token 即可完成部署。
-                    </div>
-                </div>
-            </div>
-            <div class="step">
-                <span class="step-num" aria-hidden="true">2</span>
-                <div class="step-body">
-                    <div class="step-title">取得 Discord Webhook</div>
-                    <div class="step-desc">
-                        在 Discord 頻道按齒輪 → 整合 → Webhook → 新增 Webhook，
-                        複製網址並設為環境變數 <code>DISCORD_WEBHOOK_URL</code>。
-                    </div>
-                </div>
-            </div>
-            <div class="step">
-                <span class="step-num" aria-hidden="true">3</span>
-                <div class="step-body">
-                    <div class="step-title">開始匿名發圖</div>
-                    <div class="step-desc">
-                        拖曳圖片到下方區域、<kbd>Ctrl+V</kbd> 貼上圖片或連結，
-                        按「確認發送」即可在 Discord 以暴雷遮罩顯示。
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="guide-cta">
-            <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
-                <i class="ti ti-book" aria-hidden="true"></i> 完整教學與原始碼 → GitHub
+        <div class="hero-actions">
+            <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                <i class="ti ti-brand-github" style="font-size:16px" aria-hidden="true"></i> 部署到 Vercel
+            </a>
+            <a href="#guide" class="btn-secondary">
+                <i class="ti ti-book" style="font-size:16px" aria-hidden="true"></i> 查看完整教學
             </a>
         </div>
     </section>
 
-    <!-- ── Upload Tool ── -->
-    <section class="tool-section" id="tool">
-        <div class="drop-zone" id="drop-area">
-            <i class="ti ti-upload dz-icon" aria-hidden="true"></i>
-            <div class="dz-main">點擊選取、拖曳或貼上圖片</div>
-            <div class="dz-hint">
-                支援 JPEG / PNG / WebP，上限 8MB（發送 Discord 時超過 2048px 會自動縮圖）<br>
-                Twitter/X 貼文連結可直接貼上<br>
-                Pixiv 電腦版請<b>右鍵圖片 → 複製圖片網址</b>，手機版請<b>長按圖片 → 複製連結</b>
+    <!-- ── Features ── -->
+    <section class="features" id="features">
+        <h2 class="section-title"><i class="ti ti-sparkles" aria-hidden="true"></i> 特色功能</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="ti ti-cloud-upload fc-icon" aria-hidden="true"></i>
+                <h3>拖曳 / 貼上 / 選取</h3>
+                <p>三種上傳方式任選，JPEG / PNG / WebP 皆支援，單檔上限 8MB。</p>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-masks-theater fc-icon" aria-hidden="true"></i>
+                <h3>自動暴雷遮罩</h3>
+                <p>上傳後檔案自動加上 <code>SPOILER_</code> 前綴，Discord 頻道需點擊才能顯示。</p>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-brush fc-icon" aria-hidden="true"></i>
+                <h3>局部馬賽克筆刷</h3>
+                <p>在瀏覽器內用 Canvas 塗抹遮蓋敏感區域，圖片不外送，隱私安心。</p>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-link fc-icon" aria-hidden="true"></i>
+                <h3>Twitter / X 貼文</h3>
+                <p>直接貼上推文連結，自動下載圖片以暴雷附件送出，或讓 Discord 原生 embed。</p>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-photo fc-icon" aria-hidden="true"></i>
+                <h3>Pixiv 圖片網址</h3>
+                <p>貼上 <code>i.pximg.net</code> 圖片網址，伺服器 proxy 下載後以附件送出。</p>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-history fc-icon" aria-hidden="true"></i>
+                <h3>3 天內可撤回</h3>
+                <p>發送歷史保留 3 天，一鍵撤回 Discord 上的訊息，不怕發錯。</p>
             </div>
         </div>
+    </section>
 
-        <div id="preview-container" style="display:none">
-            <div class="preview-card">
-                <div class="preview-img-wrap">
-                    <canvas id="preview-canvas"></canvas>
-                    <div class="brush-cursor" id="brush-cursor" style="display:none"></div>
-                </div>
-                <div class="mosaic-bar">
-                    <label>筆刷大小 <span id="brush-size-val">20</span><br><input type="range" id="brush-size" min="10" max="150" step="5" value="20"></label>
-                    <label>區塊大小 <span id="block-size-val">4</span><small style="color:#72767d;font-size:10px;margin-left:2px">越大越粗</small><br><input type="range" id="block-size" min="2" max="15" step="2" value="4"></label>
-                    <button class="mosaic-btn" id="clear-mosaic-btn" title="清除所有馬賽克，還原原始圖片">清除塗鴉</button>
-                    <button class="mosaic-btn" id="save-local-btn" title="下載後製完成的原始解析度 PNG 圖片">儲存圖片</button>
-                    <button class="mosaic-btn" id="copy-local-btn" title="複製後製圖片到剪貼簿，不支援時自動下載">複製圖片</button>
-                    <p class="mosaic-tip">在圖片上塗抹後可儲存、複製後製圖片，或發送到 Discord</p>
-                </div>
-                <div class="preview-body">
-                    <div class="caption-wrap">
-                        <textarea id="caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
-                        <span class="char" id="char-count">0/50</span>
-                    </div>
-                    <div class="btn-row">
-                        <button class="btn btn-send" id="confirm-btn" title="以暴雷附件方式發送到 Discord">
-                            <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>確認發送
-                        </button>
-                        <button class="btn" id="cancel-btn" title="取消並回到上傳頁面">取消</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- ── Guide ── -->
+    <section class="step-list" id="guide">
+        <h2 class="section-title"><i class="ti ti-flag" aria-hidden="true"></i> 完整部署教學</h2>
 
-        <div id="url-preview-container" style="display:none">
-            <div class="preview-card">
-                <div class="preview-img-wrap" id="url-img-wrap">
-                    <div id="url-loading">
-                        <i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px" aria-hidden="true"></i>
-                        載入預覽中...
-                    </div>
-                    <img id="url-preview-image" src="" alt="預覽" style="display:none">
-                </div>
-                <div class="spoiler-row">
-                    <label class="toggle" for="url-spoiler" aria-label="加上暴雷遮罩">
-                        <input type="checkbox" id="url-spoiler" checked>
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                    </label>
-                    <span class="toggle-label">加上暴雷遮罩</span>
-                    <span class="platform-badge" id="url-platform"></span>
-                </div>
-                <div class="mode-hint" id="url-mode-hint"></div>
-                <div class="preview-body">
-                    <div class="caption-wrap">
-                        <textarea id="url-caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
-                        <span class="char" id="url-char-count">0/50</span>
-                    </div>
-                    <div class="btn-row">
-                        <button class="btn btn-send" id="url-confirm-btn" title="發送連結到 Discord">
-                            <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>發送
-                        </button>
-                        <button class="btn" id="url-cancel-btn" title="取消並回到上傳頁面">取消</button>
-                    </div>
+        <div class="step-item">
+            <span class="step-num" aria-hidden="true">1</span>
+            <div class="step-body">
+                <h3>取得 Discord Webhook 網址</h3>
+                <p>你需要在 Discord 頻道建立一個 Webhook，讓工具可以發送訊息到該頻道。</p>
+                <ol>
+                    <li>打開你的 Discord 伺服器</li>
+                    <li>選取你要發圖的頻道（右鍵或點齒輪 ⚙️）</li>
+                    <li>進入 <strong>整合</strong> → <strong>Webhook</strong></li>
+                    <li>點擊 <strong>新增 Webhook</strong>，取一個名字</li>
+                    <li>複製 Webhook 網址（長這樣：<code>https://discord.com/api/webhooks/123456/abc-def-ghi</code>）</li>
+                </ol>
+                <div class="note">
+                    <i class="ti ti-alert-triangle" aria-hidden="true"></i> 你需要頻道的「管理 Webhook」權限。如果是伺服器管理員，預設就有。
                 </div>
             </div>
         </div>
 
-        <div class="status" id="status"></div>
-
-        <div class="history">
-            <div class="history-hdr">
-                <span class="hdr-label">
-                    <i class="ti ti-history" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>發送歷史（3天內）
-                </span>
-                <button class="clear-btn" id="clear-all-btn" title="清除所有發送紀錄（Discord 上的訊息不受影響）">
-                    <i class="ti ti-trash" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>清除全部
-                </button>
+        <div class="step-item">
+            <span class="step-num" aria-hidden="true">2</span>
+            <div class="step-body">
+                <h3>一鍵部署到 Vercel</h3>
+                <p>點擊下方按鈕，Vercel 會自動將專案 fork 到你的 GitHub 帳號並部署。</p>
+                <ol>
+                    <li>點擊 <strong>Deploy</strong> 按鈕 (或前往 <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">GitHub 專案</a>)</li>
+                    <li>登入（或註冊）Vercel 帳號，授權連接 GitHub</li>
+                    <li>在「Configure Project」頁面填入兩個環境變數：
+                        <ol>
+                            <li><code>DISCORD_WEBHOOK_URL</code> — 貼上第一步拿到的 Webhook 網址</li>
+                            <li><code>ACCESS_TOKEN</code> — 自訂一組密碼（例如 <code>MyR4nd0mK3y!</code>）</li>
+                        </ol>
+                    </li>
+                    <li>按 <strong>Deploy</strong>，等待約 1-2 分鐘</li>
+                </ol>
+                <p style="margin-top:10px">部署完成後，你的專屬網址就是 <code>https://你的專案名.vercel.app</code>。</p>
+                <div class="note">
+                    <i class="ti ti-info-circle" aria-hidden="true"></i> Vercel 免費方案即可使用，無需綁定信用卡。所有程式碼在 GitHub 上完全開源。
+                </div>
             </div>
-            <div id="history-list"></div>
         </div>
+
+        <div class="step-item">
+            <span class="step-num" aria-hidden="true">3</span>
+            <div class="step-body">
+                <h3>開始匿名發圖</h3>
+                <p>打開你的 Vercel 網址，即可看到上傳介面。</p>
+                <ol>
+                    <li>在頁面右上角（或設定區塊）找到 <strong>Token</strong> 欄位</li>
+                    <li>輸入你在部署時設定的 <code>ACCESS_TOKEN</code> 值，按確認儲存（同一瀏覽器只需一次）</li>
+                    <li>拖曳圖片到頁面、按 <kbd>Ctrl+V</kbd> 貼上，或點選上傳區域</li>
+                    <li>（選用）啟用馬賽克筆刷，塗抹需要遮蓋的區域</li>
+                    <li>按 <strong>確認發送</strong>，圖片即以暴雷遮罩 (<code>SPOILER_</code>) 發送到你的 Discord 頻道</li>
+                </ol>
+                <p style="margin-top:10px">也可直接貼上 <strong>Twitter/X 貼文連結</strong> 或 <strong>Pixiv 圖片網址</strong> 發送到 Discord。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FAQ ── -->
+    <section class="faq" id="faq">
+        <h2 class="section-title"><i class="ti ti-help-circle" aria-hidden="true"></i> 常見問題</h2>
+
+        <details class="faq-item">
+            <summary>需要註冊 Discord 機器人嗎？</summary>
+            <div class="faq-answer">不需要。本工具使用 Discord Webhook 發送訊息，不需要建立或設定 Discord Bot，也不用管理權限或 token。只需在頻道建立 Webhook 即可。</div>
+        </details>
+
+        <details class="faq-item">
+            <summary>圖片會儲存在伺服器上嗎？</summary>
+            <div class="faq-answer">不會。圖片上傳到伺服器後，立即處理並轉發到 Discord，處理完的暫存檔案會立刻刪除。馬賽克筆刷的處理完全在瀏覽器內完成，圖片從未離開你的裝置。</div>
+        </details>
+
+        <details class="faq-item">
+            <summary>部署到 Vercel 需要付費嗎？</summary>
+            <div class="faq-answer">Vercel 免費方案即可使用。免費方案每月有 100 小時執行時間和 100GB 頻寬，對於個人或小社群使用非常足夠。無需綁定信用卡。</div>
+        </details>
+
+        <details class="faq-item">
+            <summary>ACCESS_TOKEN 忘記了怎麼辦？</summary>
+            <div class="faq-answer">在 Vercel 專案設定頁面 (Settings → Environment Variables) 重新設定 <code>ACCESS_TOKEN</code> 的值，然後重新部署即可。</div>
+        </details>
+
+        <details class="faq-item">
+            <summary>可以發送非圖片檔案嗎？</summary>
+            <div class="faq-answer">目前僅支援靜態圖片（JPEG / PNG / WebP）。這是為了維持簡潔的上傳體驗，並確保 Discord 的暴雷遮罩功能正常運作。</div>
+        </details>
+
+        <details class="faq-item">
+            <summary>這是開源的嗎？可以自己修改嗎？</summary>
+            <div class="faq-answer">是的！本專案採用 MIT 授權，完全開源。你可以自由使用、修改、商用。原始碼在 <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">GitHub</a> 上。</div>
+        </details>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section class="cta">
+        <h2>準備好開始使用了嗎？</h2>
+        <p>部署到 Vercel 只需 2 分鐘，完全免費。</p>
+        <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer" class="btn-gh">
+            <i class="ti ti-brand-github" style="font-size:16px" aria-hidden="true"></i>
+            前往 GitHub 開始部署
+        </a>
     </section>
 </main>
 
-<footer>
+<footer class="container">
     <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
-        <i class="ti ti-brand-github" style="font-size:14px;vertical-align:-1px" aria-hidden="true"></i> GitHub 原始碼
+        <i class="ti ti-brand-github" style="font-size:14px;vertical-align:-1px" aria-hidden="true"></i> GitHub
     </a>
-    <span style="color:#4f545c;margin:0 8px">·</span>
-    <span style="color:#72767d;font-size:13px">MIT License</span>
-    <div class="version" id="version-stamp">載入中...</div>
+    <span style="margin:0 8px">·</span>
+    <a href="https://github.com/Sid-1996/anon-discord-img/blob/master/README.md" target="_blank" rel="noopener noreferrer">說明文件</a>
+    <span style="margin:0 8px">·</span>
+    <span>MIT License</span>
+    <div class="version">anon-discord-img · 免費開源 · <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">GitHub</a></div>
 </footer>
 
-<script>
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('file-input');
-    const previewContainer = document.getElementById('preview-container');
-    const previewCanvas = document.getElementById('preview-canvas');
-    const previewCtx = previewCanvas.getContext('2d');
-    const confirmBtn = document.getElementById('confirm-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const captionInput = document.getElementById('caption-input');
-    const charCount = document.getElementById('char-count');
-    const statusDiv = document.getElementById('status');
-    const historyList = document.getElementById('history-list');
-    const clearAllBtn = document.getElementById('clear-all-btn');
-
-    const urlPreviewContainer = document.getElementById('url-preview-container');
-    const urlLoading = document.getElementById('url-loading');
-    const urlPreviewImage = document.getElementById('url-preview-image');
-    const urlPlatform = document.getElementById('url-platform');
-    const urlSpoiler = document.getElementById('url-spoiler');
-    const urlModeHint = document.getElementById('url-mode-hint');
-    const urlCaptionInput = document.getElementById('url-caption-input');
-    const urlCharCount = document.getElementById('url-char-count');
-    const urlConfirmBtn = document.getElementById('url-confirm-btn');
-    const urlCancelBtn = document.getElementById('url-cancel-btn');
-    const brushSizeInput = document.getElementById('brush-size');
-    const blockSizeInput = document.getElementById('block-size');
-    const clearMosaicBtn = document.getElementById('clear-mosaic-btn');
-    const brushCursor = document.getElementById('brush-cursor');
-
-    const brushSizeVal = document.getElementById('brush-size-val');
-    const blockSizeVal = document.getElementById('block-size-val');
-
-    brushSizeInput.addEventListener('input', () => { brushSizeVal.textContent = brushSizeInput.value; });
-    blockSizeInput.addEventListener('input', () => { blockSizeVal.textContent = blockSizeInput.value; });
-
-    let currentFile = null, currentUrl = null, currentUrlPlatform = '';
-    let lastMousePos = null;
-    let offscreenCanvas = null, mosaicApplied = false, isPainting = false;
-    let originalCanvas = null, originalCtx = null, originalImageDataUrl = null;
-    let isComposing = false, uploadHistory = [], historyExpanded = false;
-
-    function generateThumb(source) {
-        const size = 80;
-        const tc = document.createElement('canvas');
-        tc.width = size; tc.height = size;
-        const tctx = tc.getContext('2d');
-        const sw = source.naturalWidth || source.width;
-        const sh = source.naturalHeight || source.height;
-        const scale = Math.max(size / sw, size / sh);
-        const dw = sw * scale, dh = sh * scale;
-        tctx.drawImage(source, (size - dw) / 2, (size - dh) / 2, dw, dh);
-        return tc.toDataURL('image/jpeg', 0.7);
-    }
-
-    const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-
-    function loadHistory() {
-        try {
-            const data = localStorage.getItem('upload_history');
-            const all = data ? JSON.parse(data) : [];
-            const cutoff = Date.now() - THREE_DAYS_MS;
-            const filtered = all.filter(i => i.ts && i.ts >= cutoff);
-            uploadHistory = filtered;
-            if (filtered.length !== all.length) saveHistory();
-        } catch { uploadHistory = []; }
-    }
-    function saveHistory() {
-        try { localStorage.setItem('upload_history', JSON.stringify(uploadHistory)); } catch {}
-    }
-    function formatTime(ts) {
-        const d = new Date(ts);
-        return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    }
-
-    function renderHistory() {
-        historyList.innerHTML = '';
-        if (uploadHistory.length === 0) {
-            historyList.innerHTML = '<div class="history-empty">尚無發送紀錄</div>';
-            return;
-        }
-        const reversed = [...uploadHistory].reverse();
-        const limit = historyExpanded ? reversed.length : Math.min(3, reversed.length);
-        for (let ri = 0; ri < limit; ri++) {
-            const item = reversed[ri];
-            const idx = uploadHistory.length - 1 - ri;
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            const icon = item.type === 'url' ? 'ti-link' : 'ti-photo';
-            const label = item.text ? (item.type === 'url' ? ` ${item.text}` : ` 「${item.text}」`) : '';
-            div.innerHTML = `
-                ${item.thumb
-                    ? `<img src="${item.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0;" alt="">`
-                    : `<i class="ti ${icon} hi-icon" aria-hidden="true"></i>`
-                }
-                <span class="hi-text">[${formatTime(item.ts)}]${label}</span>
-                <button class="hi-del" data-idx="${idx}" title="撤回這則 Discord 訊息">
-                    <i class="ti ti-arrow-back-up" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>撤回
-                </button>`;
-            historyList.appendChild(div);
-        }
-        if (uploadHistory.length > 3) {
-            const toggleBtn = document.createElement('button');
-            toggleBtn.className = 'clear-btn';
-            toggleBtn.textContent = historyExpanded ? '收起' : `顯示全部 ${uploadHistory.length} 筆`;
-            toggleBtn.style.display = 'block';
-            toggleBtn.style.margin = '10px auto 0';
-            toggleBtn.style.textAlign = 'center';
-            toggleBtn.addEventListener('click', () => {
-                historyExpanded = !historyExpanded;
-                renderHistory();
-            });
-            historyList.appendChild(toggleBtn);
-        }
-        historyList.querySelectorAll('.hi-del').forEach(b =>
-            b.addEventListener('click', () => deleteImage(+b.dataset.idx))
-        );
-    }
-
-    async function deleteImage(index) {
-        const item = uploadHistory[index];
-        if (!item || !item.id || !confirm('確定要撤回這則訊息嗎？')) return;
-        try {
-            const res = await fetch(`/api/send?messageId=${item.id}`, {
-                method: 'DELETE', headers: { 'x-access-token': 'change-me-to-your-own-token' }
-            });
-            if (res.ok) {
-                uploadHistory.splice(index, 1); saveHistory(); renderHistory();
-                setStatus('ok', '已成功撤回');
-            } else {
-                const e = await res.json();
-                setStatus('err', '撤回失敗：' + (e.error || '未知錯誤'));
-            }
-        } catch { setStatus('err', '網路錯誤，無法連線後端'); }
-    }
-
-    function setStatus(type, msg) {
-        statusDiv.className = 'status ' + (type || '');
-        statusDiv.textContent = msg;
-    }
-
-    function autoResize(el) {
-        el.style.height = 'auto';
-        el.style.height = el.scrollHeight + 'px';
-    }
-
-    captionInput.addEventListener('compositionstart', () => isComposing = true);
-    captionInput.addEventListener('compositionend', () => {
-        isComposing = false;
-        charCount.textContent = captionInput.value.length + '/50';
-        autoResize(captionInput);
-    });
-    captionInput.addEventListener('input', () => {
-        if (!isComposing) charCount.textContent = captionInput.value.length + '/50';
-        autoResize(captionInput);
-    });
-    urlCaptionInput.addEventListener('compositionstart', () => isComposing = true);
-    urlCaptionInput.addEventListener('compositionend', () => {
-        isComposing = false;
-        urlCharCount.textContent = urlCaptionInput.value.length + '/50';
-        autoResize(urlCaptionInput);
-    });
-    urlCaptionInput.addEventListener('input', () => {
-        if (!isComposing) urlCharCount.textContent = urlCaptionInput.value.length + '/50';
-        autoResize(urlCaptionInput);
-    });
-
-    function handleFile(file) {
-        if (!file) return;
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-            setStatus('err', '僅支援靜態圖片（JPEG / PNG / WebP）'); return;
-        }
-        currentFile = file;
-        mosaicApplied = false;
-
-        const img = new Image();
-        img.onload = () => {
-            const MAX_SIZE = 2048;
-            let w = img.naturalWidth, h = img.naturalHeight;
-            if (w > MAX_SIZE || h > MAX_SIZE) {
-                const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
-            }
-            previewCanvas.width = w;
-            previewCanvas.height = h;
-
-            const wrap = previewContainer.querySelector('.preview-img-wrap');
-            const maxW = wrap.clientWidth;
-            const maxH = window.innerHeight * 0.55;
-            let dispW = w, dispH = h;
-            const ratio = dispW / dispH;
-            if (dispW > maxW) { dispW = maxW; dispH = dispW / ratio; }
-            if (dispH > maxH) { dispH = maxH; dispW = dispH * ratio; }
-            previewCanvas.style.width = Math.round(dispW) + 'px';
-            previewCanvas.style.height = Math.round(dispH) + 'px';
-
-            previewCtx.drawImage(img, 0, 0);
-
-            offscreenCanvas = document.createElement('canvas');
-            offscreenCanvas.width = w;
-            offscreenCanvas.height = h;
-            offscreenCanvas.getContext('2d').drawImage(img, 0, 0);
-
-            originalCanvas = document.createElement('canvas');
-            originalCanvas.width = img.naturalWidth;
-            originalCanvas.height = img.naturalHeight;
-            originalCtx = originalCanvas.getContext('2d');
-            originalCtx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
-            originalImageDataUrl = originalCanvas.toDataURL('image/png');
-
-            URL.revokeObjectURL(img.src);
-        };
-        img.src = URL.createObjectURL(file);
-
-        dropArea.style.display = 'none';
-        previewContainer.style.display = 'block';
-        setStatus('', '');
-    }
-
-    function resetPreview() {
-        currentFile = null; offscreenCanvas = null; mosaicApplied = false;
-        originalCanvas = null; originalCtx = null; originalImageDataUrl = null;
-        previewCanvas.width = 0; previewCanvas.height = 0;
-        captionInput.value = ''; charCount.textContent = '0/50'; captionInput.style.height = 'auto';
-        previewContainer.style.display = 'none'; dropArea.style.display = 'block';
-    }
-
-    function enterUrlMode(url) {
-        currentUrl = url;
-        dropArea.style.display = 'none';
-        urlPreviewContainer.style.display = 'block';
-        urlPreviewImage.style.display = 'none'; urlPreviewImage.src = '';
-        urlCaptionInput.value = ''; urlCharCount.textContent = '0/50'; urlCaptionInput.style.height = 'auto';
-        setStatus('', '');
-
-        const isPximg = /i\.pximg\.net/i.test(url);
-        currentUrlPlatform = isPximg ? 'pximg' : 'Twitter/X';
-        urlPlatform.textContent = isPximg ? 'Pixiv' : 'Twitter/X';
-        urlSpoiler.checked = true; updateUrlHint();
-
-        urlLoading.style.display = 'block';
-        if (isPximg) {
-            urlLoading.innerHTML = '<i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px"></i>載入預覽中...';
-            fetchPreview(url);
-        } else {
-            urlLoading.innerHTML = `<i class="ti ti-link" style="font-size:18px;display:block;margin-bottom:6px"></i><span style="font-size:12px;word-break:break-all;color:#72767d">${url}</span>`;
-        }
-    }
-
-    async function fetchPreview(url) {
-        try {
-            const res = await fetch('/api/preview', {
-                method: 'POST',
-                headers: { 'x-access-token': 'change-me-to-your-own-token', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
-            });
-            if (res.ok) {
-                const blob = await res.blob();
-                const ou = URL.createObjectURL(blob);
-                urlPreviewImage.src = ou;
-                urlPreviewImage.onload = () => {
-                    urlPreviewImage.style.display = 'block';
-                    urlLoading.style.display = 'none';
-                    URL.revokeObjectURL(ou);
-                };
-                urlPreviewImage.onerror = () => {
-                    urlLoading.innerHTML = '<i class="ti ti-photo-off" style="font-size:22px;display:block;margin-bottom:6px"></i>預覽圖片載入失敗';
-                };
-            } else {
-                const e = await res.json();
-                urlLoading.innerHTML = `<i class="ti ti-alert-circle" style="font-size:22px;display:block;margin-bottom:6px"></i>${e.error || '載入失敗'}`;
-            }
-        } catch {
-            urlLoading.innerHTML = '<i class="ti ti-wifi-off" style="font-size:22px;display:block;margin-bottom:6px"></i>網路錯誤，無法連線後端';
-        }
-    }
-
-    function updateUrlHint() {
-        const s = urlSpoiler.checked;
-        if (currentUrlPlatform === 'Twitter/X') {
-            urlModeHint.textContent = s ? '會下載圖片並以暴雷附件送出' : '直接傳送網址，Discord 會自動顯示預覽';
-        } else {
-            urlModeHint.textContent = s ? '會下載圖片並以暴雷附件送出' : '只發送裸網址';
-        }
-    }
-
-    function cancelUrlMode() {
-        currentUrl = null; currentUrlPlatform = '';
-        urlPreviewImage.src = ''; urlCaptionInput.value = '';
-        urlCaptionInput.style.height = 'auto';
-        urlPreviewContainer.style.display = 'none'; dropArea.style.display = 'block';
-        setStatus('', ''); urlModeHint.textContent = '';
-    }
-
-    function getCanvasPos(e) {
-        const rect = previewCanvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: (clientX - rect.left) * (previewCanvas.width / rect.width),
-            y: (clientY - rect.top) * (previewCanvas.height / rect.height),
-        };
-    }
-
-    function applyMosaic(cx, cy) {
-        if (!offscreenCanvas) return;
-        const R = parseInt(brushSizeInput.value);
-        const rect = previewCanvas.getBoundingClientRect();
-        const scale = previewCanvas.width / rect.width;
-        const B = Math.max(1, Math.round(parseInt(blockSizeInput.value) * scale));
-        const w = previewCanvas.width, h = previewCanvas.height;
-        const srcCtx = offscreenCanvas.getContext('2d');
-        const srcData = srcCtx.getImageData(0, 0, w, h).data;
-
-        const startX = Math.max(0, Math.floor((cx - R) / B) * B);
-        const endX   = Math.min(w, Math.ceil((cx + R) / B) * B);
-        const startY = Math.max(0, Math.floor((cy - R) / B) * B);
-        const endY   = Math.min(h, Math.ceil((cy + R) / B) * B);
-
-        for (let gy = startY; gy < endY; gy += B) {
-            for (let gx = startX; gx < endX; gx += B) {
-                const bcx = gx + B / 2, bcy = gy + B / 2;
-                if ((bcx - cx) ** 2 + (bcy - cy) ** 2 > R * R) continue;
-
-                let tr = 0, tg = 0, tb = 0, count = 0;
-                const my = Math.min(gy + B, h), mx = Math.min(gx + B, w);
-                for (let py = gy; py < my; py++) {
-                    for (let px = gx; px < mx; px++) {
-                        const idx = (py * w + px) * 4;
-                        tr += srcData[idx];
-                        tg += srcData[idx + 1];
-                        tb += srcData[idx + 2];
-                        count++;
-                    }
-                }
-                previewCtx.fillStyle = `rgb(${(tr/count)|0},${(tg/count)|0},${(tb/count)|0})`;
-                previewCtx.fillRect(gx, gy, B, B);
-            }
-        }
-        if (originalCanvas) {
-            const origScale = originalCanvas.width / previewCanvas.width;
-            const origB = Math.max(1, Math.round(B * origScale));
-            const origSrcData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
-            const origStartX = Math.max(0, Math.floor((cx - R) / B) * B);
-            const origStartY = Math.max(0, Math.floor((cy - R) / B) * B);
-            const origEndX = Math.min(w, Math.ceil((cx + R) / B) * B);
-            const origEndY = Math.min(h, Math.ceil((cy + R) / B) * B);
-            for (let gy = origStartY; gy < origEndY; gy += B) {
-                for (let gx = origStartX; gx < origEndX; gx += B) {
-                    const bcx = gx + B / 2, bcy = gy + B / 2;
-                    if ((bcx - cx) ** 2 + (bcy - cy) ** 2 > R * R) continue;
-                    const oGx = Math.round(gx * origScale);
-                    const oGy = Math.round(gy * origScale);
-                    const oB = origB;
-                    let r = 0, g = 0, b = 0, count = 0;
-                    for (let py = oGy; py < oGy + oB && py < originalCanvas.height; py++) {
-                        for (let px = oGx; px < oGx + oB && px < originalCanvas.width; px++) {
-                            const i = (py * originalCanvas.width + px) * 4;
-                            r += origSrcData.data[i];
-                            g += origSrcData.data[i + 1];
-                            b += origSrcData.data[i + 2];
-                            count++;
-                        }
-                    }
-                    if (count > 0) {
-                        originalCtx.fillStyle = `rgb(${Math.round(r/count)},${Math.round(g/count)},${Math.round(b/count)})`;
-                        originalCtx.fillRect(oGx, oGy, oB, oB);
-                    }
-                }
-            }
-        }
-        mosaicApplied = true;
-    }
-
-    function clearMosaic() {
-        if (!offscreenCanvas) return;
-        previewCtx.drawImage(offscreenCanvas, 0, 0);
-        if (originalCanvas && originalImageDataUrl) {
-            const img2 = new Image();
-            img2.onload = () => {
-                originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
-                originalCtx.drawImage(img2, 0, 0);
-            };
-            img2.src = originalImageDataUrl;
-        }
-        mosaicApplied = false;
-    }
-
-    function updateCursor(e) {
-        const canvasRect = previewCanvas.getBoundingClientRect();
-        const wrapRect = previewCanvas.parentElement.getBoundingClientRect();
-        const clientX = e.clientX, clientY = e.clientY;
-        const R = parseInt(brushSizeInput.value);
-        const scale = canvasRect.width / previewCanvas.width;
-        const Rdisp = R * scale;
-        brushCursor.style.width = (Rdisp * 2) + 'px';
-        brushCursor.style.height = (Rdisp * 2) + 'px';
-        brushCursor.style.left = (clientX - wrapRect.left - Rdisp) + 'px';
-        brushCursor.style.top  = (clientY - wrapRect.top  - Rdisp) + 'px';
-    }
-
-    previewCanvas.addEventListener('mousedown',  e => { isPainting = true;  brushCursor.style.display = 'none'; const p = getCanvasPos(e); applyMosaic(p.x, p.y); });
-    previewCanvas.addEventListener('mousemove',  e => { updateCursor(e); if (isPainting) { const p = getCanvasPos(e); applyMosaic(p.x, p.y); } });
-    previewCanvas.addEventListener('mouseup',    e => { isPainting = false; brushCursor.style.display = 'block'; updateCursor(e); });
-    previewCanvas.addEventListener('mouseenter', e => { brushCursor.style.display = 'block'; updateCursor(e); });
-    previewCanvas.addEventListener('mouseleave', () => { isPainting = false; brushCursor.style.display = 'none'; });
-    previewCanvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = true;  brushCursor.style.display = 'none'; const p = getCanvasPos(e); applyMosaic(p.x, p.y); });
-    previewCanvas.addEventListener('touchmove',  e => { e.preventDefault(); if (isPainting) { const p = getCanvasPos(e); applyMosaic(p.x, p.y); } });
-    previewCanvas.addEventListener('touchcancel', () => { isPainting = false; brushCursor.style.display = 'none'; });
-    previewCanvas.addEventListener('touchend',   e => { isPainting = false; brushCursor.style.display = 'block'; const t = e.changedTouches[0]; if (t) updateCursor({ clientX: t.clientX, clientY: t.clientY }); });
-
-    clearMosaicBtn.addEventListener('click', clearMosaic);
-
-    document.getElementById('save-local-btn').addEventListener('click', () => {
-        if (!originalCanvas) return;
-        originalCanvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'mosaic_image.png';
-            a.click();
-            URL.revokeObjectURL(url);
-        }, 'image/png');
-    });
-
-    document.getElementById('copy-local-btn').addEventListener('click', async () => {
-        if (!originalCanvas) return;
-        const blob = await new Promise(resolve => originalCanvas.toBlob(resolve, 'image/png'));
-
-        if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({ 'image/png': blob })
-                ]);
-                setStatus('ok', '已複製到剪貼簿！');
-                return;
-            } catch (e) {}
-        }
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mosaic_image.png';
-        a.click();
-        URL.revokeObjectURL(url);
-        setStatus('ok', '裝置不支援複製，已改為下載圖片');
-    });
-
-    async function confirmSend() {
-        if (!currentFile) return;
-        if (isComposing) await new Promise(r => captionInput.addEventListener('compositionend', r, { once: true }));
-        const formData = new FormData();
-        if (mosaicApplied) {
-            const blob = await new Promise(resolve => previewCanvas.toBlob(resolve, 'image/jpeg', 0.92));
-            if (!blob) { setStatus('err', '圖片處理失敗'); return; }
-            formData.append('file', blob, 'SPOILER_image.jpg');
-        } else {
-            formData.append('file', currentFile, 'SPOILER_image.png');
-        }
-        const caption = captionInput.value.trim();
-        if (caption) formData.append('content', caption);
-        confirmBtn.disabled = cancelBtn.disabled = captionInput.disabled = true;
-        setStatus('', '發送中，請稍候...');
-        try {
-            const res = await fetch('/api/send', {
-                method: 'POST', headers: { 'x-access-token': 'change-me-to-your-own-token' }, body: formData
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const thumb = generateThumb(previewCanvas);
-                uploadHistory.push({ id: data.id, ts: Date.now(), text: caption, thumb });
-                saveHistory(); renderHistory();
-                setStatus('ok', '發送成功！（已自動暴雷）'); resetPreview();
-            } else {
-                const e = await res.json();
-                setStatus('err', '發送失敗：' + (e.error || '未知錯誤'));
-            }
-        } catch { setStatus('err', '連線後端發生錯誤'); }
-        confirmBtn.disabled = cancelBtn.disabled = captionInput.disabled = false;
-    }
-
-    async function confirmUrlSend() {
-        if (!currentUrl) return;
-        if (isComposing) await new Promise(r => urlCaptionInput.addEventListener('compositionend', r, { once: true }));
-        const spoiler = urlSpoiler.checked;
-        const caption = urlCaptionInput.value.trim();
-        urlConfirmBtn.disabled = urlCancelBtn.disabled = urlCaptionInput.disabled = true;
-        setStatus('', '發送中，請稍候...');
-        try {
-            const body = { url: currentUrl, spoiler };
-            if (caption) body.content = caption;
-            const res = await fetch('/api/fetch-url', {
-                method: 'POST',
-                headers: { 'x-access-token': 'change-me-to-your-own-token', 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const label = currentUrlPlatform === 'pximg' ? 'Pixiv 圖片' : 'Twitter/X';
-                const thumb = (urlPreviewImage.style.display !== 'none' && urlPreviewImage.src)
-                    ? generateThumb(urlPreviewImage)
-                    : null;
-                uploadHistory.push({ id: data.id, ts: Date.now(), text: label, type: 'url', thumb });
-                saveHistory(); renderHistory();
-                setStatus('ok', spoiler ? '發送成功！（已自動暴雷）' : '發送成功！');
-                cancelUrlMode();
-            } else {
-                const e = await res.json();
-                setStatus('err', '發送失敗：' + (e.error || '未知錯誤'));
-            }
-        } catch { setStatus('err', '連線後端發生錯誤'); }
-        urlConfirmBtn.disabled = urlCancelBtn.disabled = urlCaptionInput.disabled = false;
-    }
-
-    dropArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value = ''; });
-
-    let dragCounter = 0;
-    dropArea.addEventListener('dragenter', e => { e.preventDefault(); dragCounter++; if (dragCounter === 1) dropArea.classList.add('drag-over'); });
-    dropArea.addEventListener('dragover', e => e.preventDefault());
-    dropArea.addEventListener('dragleave', () => { dragCounter--; if (!dragCounter) dropArea.classList.remove('drag-over'); });
-    dropArea.addEventListener('drop', e => {
-        e.preventDefault(); dragCounter = 0; dropArea.classList.remove('drag-over');
-        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-    });
-
-    document.addEventListener('paste', e => {
-        if (document.activeElement === captionInput || document.activeElement === urlCaptionInput) return;
-        for (const item of e.clipboardData.items) {
-            if (['image/jpeg', 'image/png', 'image/webp'].includes(item.type)) {
-                const f = item.getAsFile(); if (f) { handleFile(f); return; }
-            }
-        }
-        const text = e.clipboardData.getData('text/plain').trim();
-        if (/twitter\.com\/\w+\/status\/\d+|x\.com\/\w+\/status\/\d+|i\.pximg\.net\/.+\.(?:jpg|jpeg|png|webp|gif)/i.test(text)) {
-            enterUrlMode(text); return;
-        }
-        if (text) setStatus('err', '不支援的網址，目前支援 Twitter/X 貼文和 Pixiv 圖片連結（右鍵複製圖片網址）');
-        else setStatus('err', '剪貼簿內容不支援，請貼上 JPEG / PNG / WebP 圖片或支援的網址');
-    });
-
-    confirmBtn.addEventListener('click', confirmSend);
-    cancelBtn.addEventListener('click', () => {
-        clearMosaic();
-        offscreenCanvas = null;
-        resetPreview();
-    });
-    urlConfirmBtn.addEventListener('click', confirmUrlSend);
-    urlCancelBtn.addEventListener('click', cancelUrlMode);
-    urlSpoiler.addEventListener('change', updateUrlHint);
-    clearAllBtn.addEventListener('click', () => {
-        if (!uploadHistory.length || !confirm('確定要清除全部發送紀錄嗎？（Discord 上的訊息不受影響）')) return;
-        uploadHistory = []; saveHistory(); renderHistory();
-    });
-
-    fetch('/api/version')
-        .then(r => r.json())
-        .then(d => { document.getElementById('version-stamp').textContent = 'v' + d.version; })
-        .catch(() => { document.getElementById('version-stamp').textContent = ''; });
-
-    loadHistory();
-    renderHistory();
-</script>
 </body>
 </html>
