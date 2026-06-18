@@ -3,20 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自動暴雷匿名發圖器</title>
+    <title>匿名 Discord 發圖工具 · 自動暴雷遮罩 anon-discord-img</title>
+    <meta name="description" content="免費匿名 Discord 圖片上傳工具，自動加上暴雷遮罩（SPOILER_）。支援拖曳上傳、局部馬賽克筆刷、Twitter/X 貼文連結與 Pixiv 圖片網址。免登入、免安裝、一鍵部署到 Vercel。">
+    <meta name="keywords" content="Discord,匿名,圖片上傳,暴雷,spoiler,遮罩,馬賽克,Webhook,Pixiv,Twitter,X,Vercel,免費,工具">
+    <meta name="author" content="anon-discord-img">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="anon-discord-img · 匿名 Discord 發圖工具">
+    <meta property="og:description" content="上傳圖片到 Discord 頻道，自動加上暴雷遮罩 — 不需登入、不需額外點擊。支援馬賽克筆刷與 Twitter/Pixiv 連結。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://anon-discord-img.vercel.app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="anon-discord-img · 匿名 Discord 發圖工具">
+    <meta name="twitter:description" content="匿名上傳圖片到 Discord，自動暴雷遮罩。支援馬賽克筆刷、Twitter/X 貼文與 Pixiv 圖片網址。">
+
+    <link rel="canonical" href="https://anon-discord-img.vercel.app">
+
+    <script type="application/ld+json">
+    [{
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "anon-discord-img",
+      "alternateName": "匿名 Discord 發圖工具",
+      "description": "上傳圖片到 Discord 頻道，自動加上暴雷遮罩。支援拖曳上傳、局部馬賽克筆刷、Twitter/X 貼文連結與 Pixiv 圖片網址。",
+      "url": "https://anon-discord-img.vercel.app",
+      "applicationCategory": "Multimedia",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+      "author": {
+        "@type": "Organization",
+        "name": "anon-discord-img",
+        "url": "https://github.com/Sid-1996/anon-discord-img"
+      }
+    },{
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "使用匿名 Discord 發圖工具",
+      "description": "三步驟快速上手：部署、設定 Webhook、開始發圖",
+      "totalTime": "PT5M",
+      "step": [
+        { "@type": "HowToStep", "position": 1, "name": "一鍵部署到 Vercel",
+          "text": "點擊 README 的 Deploy 按鈕，將專案部署到 Vercel（免費）。" },
+        { "@type": "HowToStep", "position": 2, "name": "設定 Discord Webhook",
+          "text": "在 Discord 頻道建立 Webhook，將網址填入環境變數 DISCORD_WEBHOOK_URL。" },
+        { "@type": "HowToStep", "position": 3, "name": "開始發圖",
+          "text": "拖曳圖片、貼上連結，或從檔案選取器上傳，按發送即可在 Discord 以暴雷遮罩顯示。" }
+      ]
+    }]
+    </script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* ── Reset ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Layout ── */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 520px; margin: 0 auto; padding: 24px 16px;
+            max-width: 640px; margin: 0 auto; padding: 0 16px 32px;
             background-color: #2f3136; color: #dcddde;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
-        .header { text-align: center; margin-bottom: 24px; }
-        .header h1 { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 4px; }
-        .header p { font-size: 13px; color: #72767d; line-height: 1.5; }
+        main { flex: 1; }
 
+        /* ── Header / Nav ── */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 0.5px solid #3a3d44; margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 15px; font-weight: 600; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .logo i { color: #7289da; font-size: 20px; }
+        nav { display: flex; align-items: center; gap: 12px; }
+        nav a {
+            font-size: 13px; color: #72767d; text-decoration: none;
+            transition: color 0.15s;
+        }
+        nav a:hover { color: #dcddde; }
+
+        /* ── Hero ── */
+        .hero { text-align: center; margin-bottom: 32px; }
+        .hero h1 {
+            font-size: 26px; font-weight: 600; color: #fff;
+            margin-bottom: 8px; letter-spacing: -0.01em;
+        }
+        .hero .tagline {
+            font-size: 14px; color: #72767d; line-height: 1.6;
+            max-width: 480px; margin: 0 auto 16px;
+        }
+        .hero-badges {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            margin-bottom: 6px;
+        }
+        .hero-badges .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12px; padding: 5px 11px;
+            border-radius: 99px; border: 0.5px solid #4f545c;
+            background: #292b2f; color: #b9bbbe; white-space: nowrap;
+        }
+        .hero-badges .badge i { font-size: 14px; color: #7289da; }
+
+        /* ── How-to Guide ── */
+        .guide { margin-bottom: 32px; }
+        .guide h2 {
+            font-size: 16px; font-weight: 600; color: #fff;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        .guide h2 i { color: #7289da; }
+        .steps { display: flex; flex-direction: column; gap: 8px; }
+        .step {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 14px; border-radius: 10px;
+            background: #292b2f; border: 0.5px solid #3a3d44;
+        }
+        .step-num {
+            flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+            background: #404776; color: #c5c8f8;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; margin-top: 1px;
+        }
+        .step-body { flex: 1; min-width: 0; }
+        .step-body .step-title {
+            font-size: 14px; font-weight: 500; color: #fff; margin-bottom: 2px;
+        }
+        .step-body .step-desc {
+            font-size: 13px; color: #72767d; line-height: 1.5;
+        }
+        .step-body .step-desc a { color: #7289da; text-decoration: none; }
+        .step-body .step-desc a:hover { text-decoration: underline; }
+
+        .guide-cta {
+            text-align: center; margin-top: 12px;
+        }
+        .guide-cta a {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; color: #7289da; text-decoration: none;
+        }
+        .guide-cta a:hover { color: #8ea1e1; }
+
+        /* ── Tool Section ── */
+        .tool-section { margin-bottom: 24px; }
+
+        /* ── Upload Tool (existing styles) ── */
         .drop-zone {
             border: 1.5px dashed #4f545c; border-radius: 12px;
             padding: 48px 20px; text-align: center; cursor: pointer;
@@ -35,7 +168,8 @@
         }
         .preview-img-wrap {
             background: #000; display: flex; align-items: center; justify-content: center;
-            min-height: 200px; max-height: 55vh; overflow: hidden; position: relative; -webkit-user-select: none; user-select: none;
+            min-height: 200px; max-height: 55vh; overflow: hidden; position: relative;
+            -webkit-user-select: none; user-select: none;
         }
         .preview-img-wrap img,
         .preview-img-wrap canvas { max-width: 100%; max-height: 55vh; object-fit: contain; display: block; }
@@ -169,12 +303,21 @@
             line-height: 1.5;
         }
 
-        .version { text-align: center; font-size: 11px; color: #4f545c; margin-top: 20px; user-select: none; }
-
         input[type="file"] { display: none; }
 
+        /* ── Footer ── */
+        footer {
+            text-align: center; padding: 20px 0 8px;
+            border-top: 0.5px solid #3a3d44; margin-top: 12px;
+        }
+        footer a { color: #7289da; text-decoration: none; }
+        footer a:hover { color: #8ea1e1; }
+        footer .version { font-size: 11px; color: #4f545c; margin-top: 6px; user-select: none; }
+
+        /* ── Responsive ── */
         @media (max-width: 420px) {
-            body { padding: 16px 12px; }
+            body { padding: 0 12px 24px; }
+            .hero h1 { font-size: 22px; }
             .drop-zone { padding: 36px 16px; }
             .btn { padding: 9px 14px; font-size: 13px; }
             .mosaic-bar { gap: 10px; padding: 10px 12px; }
@@ -188,99 +331,175 @@
 
 <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp">
 
-<div class="header">
-    <h1><i class="ti ti-eye-off" style="font-size:18px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>自動暴雷匿名發圖器</h1>
-    <p>拖曳圖片、貼上連結，一鍵加暴雷傳送到 Discord</p>
-</div>
+<header>
+    <span class="logo"><i class="ti ti-eye-off" aria-hidden="true"></i>anon-discord-img</span>
+    <nav>
+        <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-brand-github" style="font-size:16px;vertical-align:-2px" aria-hidden="true"></i> GitHub
+        </a>
+        <a href="#tool">開始使用</a>
+    </nav>
+</header>
 
-<div class="drop-zone" id="drop-area">
-    <i class="ti ti-upload dz-icon" aria-hidden="true"></i>
-    <div class="dz-main">點擊選取、拖曳或貼上圖片</div>
-    <div class="dz-hint">
-        支援 JPEG / PNG / WebP，上限 8MB（發送 Discord 時超過 2048px 會自動縮圖）<br>
-        Twitter/X 貼文連結可直接貼上<br>
-        Pixiv 電腦版請<b>右鍵圖片 → 複製圖片網址</b>，手機版請<b>長按圖片 → 複製連結</b>
-    </div>
-</div>
+<main>
+    <!-- ── Hero ── -->
+    <section class="hero">
+        <h1>匿名 Discord 發圖工具</h1>
+        <p class="tagline">
+            上傳圖片到 Discord 頻道，自動加上暴雷遮罩 — 不需登入、不需額外點擊。<br>
+            支援拖曳上傳、局部馬賽克筆刷、社群媒體連結。
+        </p>
+        <div class="hero-badges">
+            <span class="badge"><i class="ti ti-cloud-upload" aria-hidden="true"></i> 拖曳 / 貼上</span>
+            <span class="badge"><i class="ti ti-masks-theater" aria-hidden="true"></i> 自動暴雷</span>
+            <span class="badge"><i class="ti ti-brush" aria-hidden="true"></i> 局部馬賽克</span>
+            <span class="badge"><i class="ti ti-brand-twitter" aria-hidden="true"></i> Twitter / X</span>
+            <span class="badge"><i class="ti ti-brand-pixiv" aria-hidden="true"></i> Pixiv</span>
+            <span class="badge"><i class="ti ti-history" aria-hidden="true"></i> 3天內可撤回</span>
+        </div>
+    </section>
 
-<div id="preview-container" style="display:none">
-    <div class="preview-card">
-        <div class="preview-img-wrap">
-            <canvas id="preview-canvas"></canvas>
-            <div class="brush-cursor" id="brush-cursor" style="display:none"></div>
-        </div>
-        <div class="mosaic-bar">
-            <label>筆刷大小 <span id="brush-size-val">20</span><br><input type="range" id="brush-size" min="10" max="150" step="5" value="20"></label>
-            <label>區塊大小 <span id="block-size-val">4</span><small style="color:#72767d;font-size:10px;margin-left:2px">越大越粗</small><br><input type="range" id="block-size" min="2" max="15" step="2" value="4"></label>
-            <button class="mosaic-btn" id="clear-mosaic-btn" title="清除所有馬賽克，還原原始圖片">清除塗鴉</button>
-            <button class="mosaic-btn" id="save-local-btn" title="下載後製完成的原始解析度 PNG 圖片">儲存圖片</button>
-            <button class="mosaic-btn" id="copy-local-btn" title="複製後製圖片到剪貼簿，不支援時自動下載">複製圖片</button>
-            <p class="mosaic-tip">在圖片上塗抹後可儲存、複製後製圖片，或發送到 Discord</p>
-        </div>
-        <div class="preview-body">
-            <div class="caption-wrap">
-                <textarea id="caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
-                <span class="char" id="char-count">0/50</span>
+    <!-- ── How-to Guide ── -->
+    <section class="guide">
+        <h2><i class="ti ti-flag" aria-hidden="true"></i> 三步驟快速上手</h2>
+        <div class="steps">
+            <div class="step">
+                <span class="step-num" aria-hidden="true">1</span>
+                <div class="step-body">
+                    <div class="step-title">一鍵部署到 Vercel</div>
+                    <div class="step-desc">
+                        點擊 <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">GitHub 專案</a> 的 Deploy 按鈕，
+                        填入 <strong>Discord Webhook</strong> 網址與自訂 Token 即可完成部署。
+                    </div>
+                </div>
             </div>
-            <div class="btn-row">
-                <button class="btn btn-send" id="confirm-btn" title="以暴雷附件方式發送到 Discord">
-                    <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>確認發送
+            <div class="step">
+                <span class="step-num" aria-hidden="true">2</span>
+                <div class="step-body">
+                    <div class="step-title">取得 Discord Webhook</div>
+                    <div class="step-desc">
+                        在 Discord 頻道按齒輪 → 整合 → Webhook → 新增 Webhook，
+                        複製網址並設為環境變數 <code>DISCORD_WEBHOOK_URL</code>。
+                    </div>
+                </div>
+            </div>
+            <div class="step">
+                <span class="step-num" aria-hidden="true">3</span>
+                <div class="step-body">
+                    <div class="step-title">開始匿名發圖</div>
+                    <div class="step-desc">
+                        拖曳圖片到下方區域、<kbd>Ctrl+V</kbd> 貼上圖片或連結，
+                        按「確認發送」即可在 Discord 以暴雷遮罩顯示。
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="guide-cta">
+            <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
+                <i class="ti ti-book" aria-hidden="true"></i> 完整教學與原始碼 → GitHub
+            </a>
+        </div>
+    </section>
+
+    <!-- ── Upload Tool ── -->
+    <section class="tool-section" id="tool">
+        <div class="drop-zone" id="drop-area">
+            <i class="ti ti-upload dz-icon" aria-hidden="true"></i>
+            <div class="dz-main">點擊選取、拖曳或貼上圖片</div>
+            <div class="dz-hint">
+                支援 JPEG / PNG / WebP，上限 8MB（發送 Discord 時超過 2048px 會自動縮圖）<br>
+                Twitter/X 貼文連結可直接貼上<br>
+                Pixiv 電腦版請<b>右鍵圖片 → 複製圖片網址</b>，手機版請<b>長按圖片 → 複製連結</b>
+            </div>
+        </div>
+
+        <div id="preview-container" style="display:none">
+            <div class="preview-card">
+                <div class="preview-img-wrap">
+                    <canvas id="preview-canvas"></canvas>
+                    <div class="brush-cursor" id="brush-cursor" style="display:none"></div>
+                </div>
+                <div class="mosaic-bar">
+                    <label>筆刷大小 <span id="brush-size-val">20</span><br><input type="range" id="brush-size" min="10" max="150" step="5" value="20"></label>
+                    <label>區塊大小 <span id="block-size-val">4</span><small style="color:#72767d;font-size:10px;margin-left:2px">越大越粗</small><br><input type="range" id="block-size" min="2" max="15" step="2" value="4"></label>
+                    <button class="mosaic-btn" id="clear-mosaic-btn" title="清除所有馬賽克，還原原始圖片">清除塗鴉</button>
+                    <button class="mosaic-btn" id="save-local-btn" title="下載後製完成的原始解析度 PNG 圖片">儲存圖片</button>
+                    <button class="mosaic-btn" id="copy-local-btn" title="複製後製圖片到剪貼簿，不支援時自動下載">複製圖片</button>
+                    <p class="mosaic-tip">在圖片上塗抹後可儲存、複製後製圖片，或發送到 Discord</p>
+                </div>
+                <div class="preview-body">
+                    <div class="caption-wrap">
+                        <textarea id="caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
+                        <span class="char" id="char-count">0/50</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-send" id="confirm-btn" title="以暴雷附件方式發送到 Discord">
+                            <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>確認發送
+                        </button>
+                        <button class="btn" id="cancel-btn" title="取消並回到上傳頁面">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="url-preview-container" style="display:none">
+            <div class="preview-card">
+                <div class="preview-img-wrap" id="url-img-wrap">
+                    <div id="url-loading">
+                        <i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px" aria-hidden="true"></i>
+                        載入預覽中...
+                    </div>
+                    <img id="url-preview-image" src="" alt="預覽" style="display:none">
+                </div>
+                <div class="spoiler-row">
+                    <label class="toggle" for="url-spoiler" aria-label="加上暴雷遮罩">
+                        <input type="checkbox" id="url-spoiler" checked>
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                    </label>
+                    <span class="toggle-label">加上暴雷遮罩</span>
+                    <span class="platform-badge" id="url-platform"></span>
+                </div>
+                <div class="mode-hint" id="url-mode-hint"></div>
+                <div class="preview-body">
+                    <div class="caption-wrap">
+                        <textarea id="url-caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
+                        <span class="char" id="url-char-count">0/50</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-send" id="url-confirm-btn" title="發送連結到 Discord">
+                            <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>發送
+                        </button>
+                        <button class="btn" id="url-cancel-btn" title="取消並回到上傳頁面">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="history">
+            <div class="history-hdr">
+                <span class="hdr-label">
+                    <i class="ti ti-history" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>發送歷史（3天內）
+                </span>
+                <button class="clear-btn" id="clear-all-btn" title="清除所有發送紀錄（Discord 上的訊息不受影響）">
+                    <i class="ti ti-trash" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>清除全部
                 </button>
-                <button class="btn" id="cancel-btn" title="取消並回到上傳頁面">取消</button>
             </div>
+            <div id="history-list"></div>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
-<div id="url-preview-container" style="display:none">
-    <div class="preview-card">
-        <div class="preview-img-wrap" id="url-img-wrap">
-            <div id="url-loading">
-                <i class="ti ti-loader" style="font-size:22px;display:block;margin-bottom:8px" aria-hidden="true"></i>
-                載入預覽中...
-            </div>
-            <img id="url-preview-image" src="" alt="預覽" style="display:none">
-        </div>
-        <div class="spoiler-row">
-            <label class="toggle" for="url-spoiler" aria-label="加上暴雷遮罩">
-                <input type="checkbox" id="url-spoiler" checked>
-                <div class="track"></div>
-                <div class="thumb"></div>
-            </label>
-            <span class="toggle-label">加上暴雷遮罩</span>
-            <span class="platform-badge" id="url-platform"></span>
-        </div>
-        <div class="mode-hint" id="url-mode-hint"></div>
-        <div class="preview-body">
-            <div class="caption-wrap">
-                <textarea id="url-caption-input" placeholder="附註文字（選填，最多 50 字）" maxlength="50"></textarea>
-                <span class="char" id="url-char-count">0/50</span>
-            </div>
-            <div class="btn-row">
-                <button class="btn btn-send" id="url-confirm-btn" title="發送連結到 Discord">
-                    <i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>發送
-                </button>
-                <button class="btn" id="url-cancel-btn" title="取消並回到上傳頁面">取消</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="status" id="status"></div>
-
-<div class="history">
-    <div class="history-hdr">
-        <span class="hdr-label">
-            <i class="ti ti-history" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>發送歷史（3天內）
-        </span>
-        <button class="clear-btn" id="clear-all-btn" title="清除所有發送紀錄（Discord 上的訊息不受影響）">
-            <i class="ti ti-trash" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>清除全部
-        </button>
-    </div>
-    <div id="history-list"></div>
-</div>
-
-<div class="version" id="version-stamp">載入中...</div>
+<footer>
+    <a href="https://github.com/Sid-1996/anon-discord-img" target="_blank" rel="noopener noreferrer">
+        <i class="ti ti-brand-github" style="font-size:14px;vertical-align:-1px" aria-hidden="true"></i> GitHub 原始碼
+    </a>
+    <span style="color:#4f545c;margin:0 8px">·</span>
+    <span style="color:#72767d;font-size:13px">MIT License</span>
+    <div class="version" id="version-stamp">載入中...</div>
+</footer>
 
 <script>
     const dropArea = document.getElementById('drop-area');
@@ -314,12 +533,8 @@
     const brushSizeVal = document.getElementById('brush-size-val');
     const blockSizeVal = document.getElementById('block-size-val');
 
-    brushSizeInput.addEventListener('input', () => {
-        brushSizeVal.textContent = brushSizeInput.value;
-    });
-    blockSizeInput.addEventListener('input', () => {
-        blockSizeVal.textContent = blockSizeInput.value;
-    });
+    brushSizeInput.addEventListener('input', () => { brushSizeVal.textContent = brushSizeInput.value; });
+    blockSizeInput.addEventListener('input', () => { blockSizeVal.textContent = blockSizeInput.value; });
 
     let currentFile = null, currentUrl = null, currentUrlPlatform = '';
     let lastMousePos = null;
@@ -377,7 +592,7 @@
             const label = item.text ? (item.type === 'url' ? ` ${item.text}` : ` 「${item.text}」`) : '';
             div.innerHTML = `
                 ${item.thumb
-                    ? `<img src="${item.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0;">`
+                    ? `<img src="${item.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0;" alt="">`
                     : `<i class="ti ${icon} hi-icon" aria-hidden="true"></i>`
                 }
                 <span class="hi-text">[${formatTime(item.ts)}]${label}</span>
@@ -472,7 +687,6 @@
             previewCanvas.width = w;
             previewCanvas.height = h;
 
-            // 計算 Canvas 顯示尺寸（維持比例、不超過容器）
             const wrap = previewContainer.querySelector('.preview-img-wrap');
             const maxW = wrap.clientWidth;
             const maxH = window.innerHeight * 0.55;
@@ -626,7 +840,6 @@
                 previewCtx.fillRect(gx, gy, B, B);
             }
         }
-        // 同步到 originalCanvas（原始尺寸）
         if (originalCanvas) {
             const origScale = originalCanvas.width / previewCanvas.width;
             const origB = Math.max(1, Math.round(B * origScale));
@@ -717,7 +930,6 @@
         if (!originalCanvas) return;
         const blob = await new Promise(resolve => originalCanvas.toBlob(resolve, 'image/png'));
 
-        // 嘗試複製到剪貼簿
         if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
             try {
                 await navigator.clipboard.write([
@@ -725,12 +937,9 @@
                 ]);
                 setStatus('ok', '已複製到剪貼簿！');
                 return;
-            } catch (e) {
-                // 複製失敗，降級為下載
-            }
+            } catch (e) {}
         }
 
-        // Fallback：直接下載
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -806,7 +1015,6 @@
         urlConfirmBtn.disabled = urlCancelBtn.disabled = urlCaptionInput.disabled = false;
     }
 
-    // Drop zone events
     dropArea.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value = ''; });
 
@@ -850,12 +1058,8 @@
 
     fetch('/api/version')
         .then(r => r.json())
-        .then(d => {
-            document.getElementById('version-stamp').textContent = 'v' + d.version;
-        })
-        .catch(() => {
-            document.getElementById('version-stamp').textContent = '';
-        });
+        .then(d => { document.getElementById('version-stamp').textContent = 'v' + d.version; })
+        .catch(() => { document.getElementById('version-stamp').textContent = ''; });
 
     loadHistory();
     renderHistory();
