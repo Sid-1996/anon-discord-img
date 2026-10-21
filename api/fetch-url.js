@@ -148,7 +148,7 @@ async function fetchTwitterImage(url) {
 }
 
 async function fetchImage(url) {
-  if (/i\.pximg\.net\/.+\.(?:jpg|jpeg|png|webp|gif)/i.test(url)) {
+  if (/^https:\/\/i\.pximg\.net\/\S+\.(?:jpg|jpeg|png|webp|gif)/i.test(url)) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       const imgRes = await fetch(url, {
         headers: { 'Referer': 'https://www.pixiv.net/' },
