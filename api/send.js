@@ -75,9 +75,7 @@ export default async function handler(req, res) {
       const discordForm = new FormData();
       const blob = new Blob([fileBuffer], { type: file.mimetype });
       discordForm.append('file', blob, 'SPOILER_image.png');
-      if (content) {
-        discordForm.append('payload_json', JSON.stringify({ content }));
-      }
+      discordForm.append('payload_json', JSON.stringify({ content, allowed_mentions: { parse: ['users'] } }));
 
       const discordRes = await fetch(`${DISCORD_WEBHOOK_URL}?wait=true`, {
         method: 'POST',
@@ -110,6 +108,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少 messageId 參數' });
     }
     try {
+      if (!/^\d{17,20}$/.test(messageId)) {
+        return res.status(400).json({ error: 'messageId 格式不正確' });
+      }
       const deleteRes = await fetch(`${DISCORD_WEBHOOK_URL}/messages/${messageId}`, {
         method: 'DELETE',
       });

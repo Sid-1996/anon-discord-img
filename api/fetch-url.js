@@ -75,7 +75,7 @@ export default async function handler(req, res) {
         if (content) {
           messageContent += `\n${sanitize(content)}`;
         }
-        discordForm.append('payload_json', JSON.stringify({ content: messageContent }));
+        discordForm.append('payload_json', JSON.stringify({ content: messageContent, allowed_mentions: { parse: ['users'] } }));
 
         discordRes = await fetch(`${DISCORD_WEBHOOK_URL}?wait=true`, {
           method: 'POST',
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         discordRes = await fetch(`${DISCORD_WEBHOOK_URL}?wait=true`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: messageContent }),
+          body: JSON.stringify({ content: messageContent, allowed_mentions: { parse: ['users'] } }),
         });
       }
     } else {
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
       if (content) {
         messageContent = sanitize(content);
       }
-      discordForm.append('payload_json', JSON.stringify({ content: messageContent }));
+      discordForm.append('payload_json', JSON.stringify({ content: messageContent, allowed_mentions: { parse: ['users'] } }));
 
       discordRes = await fetch(`${DISCORD_WEBHOOK_URL}?wait=true`, {
         method: 'POST',

@@ -3,7 +3,7 @@
 > 匿名上傳圖片到 Discord，自動暴雷遮罩 • Upload images to Discord with auto-spoiler
 
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-Vercel-blue)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
@@ -69,7 +69,7 @@ Steps to complete:
 Ask me for any credentials you need. Do not proceed past step 3 until I provide the values.
 ```
 
-> ⚠️ 注意：執行前請確認你已安裝 [Node.js](https://nodejs.org)（v18 以上）與 [Vercel CLI](https://vercel.com/docs/cli)，或讓 AI 幫你安裝。
+> ⚠️ 注意：執行前請確認你已安裝 [Node.js](https://nodejs.org)（v22 以上，建議安裝最新的 LTS 修補版）與 [Vercel CLI](https://vercel.com/docs/cli)，或讓 AI 幫你安裝。
 
 </details>
 
@@ -187,7 +187,9 @@ vercel dev
 | **ACCESS_TOKEN** | 每次 API 請求須帶 `x-access-token` 標頭，擋掉亂掃的 crawler |
 | **大小限制** | 單檔最大 8MB |
 | **Magic byte 驗證** | 伺服器檢查真實檔案類型（JPEG/PNG/WebP），不看副檔名 |
-| **@everyone / @here 消毒** | 自動屏蔽，避免被濫用 |
+| **提及（@）控制** | 以 `allowed_mentions` 限制：`@everyone`、`@here`、身分組標註一律不會通知，避免被濫用；個別使用者仍可用 `<@使用者ID>` 標註 |
+| **撤回 ID 驗證** | 撤回訊息時只接受純數字的 Discord 訊息 ID |
+| **Pixiv 網址限制** | 只接受以 `https://i.pximg.net/` 開頭的圖片網址，避免伺服器被導去抓任意網址 |
 | **限流** | 每 IP 每 60 秒 10 次（有 Redis 則啟用分散式，無則略過） |
 | **暫存檔清理** | 處理完立即刪除 |
 
@@ -212,7 +214,7 @@ vercel dev
 │   └── version.js        回傳 git commit SHA（版本戳記）
 ├── index.html            全功能前端（HTML + CSS + JS + Canvas 馬賽克）
 ├── vercel.json           Vercel 路由設定
-├── package.json          相依套件（formidable, @vercel/kv, sharp）
+├── package.json          相依套件（formidable, @upstash/redis, sharp）
 ├── .env.example          環境變數範本
 ├── .gitignore
 └── LICENSE               MIT 授權
@@ -284,7 +286,7 @@ Steps to complete:
 Ask me for any credentials you need. Do not proceed past step 3 until I provide the values.
 ```
 
-> ⚠️ Make sure [Node.js](https://nodejs.org) (v18+) is installed, or ask the AI to install it for you first.
+> ⚠️ Make sure [Node.js](https://nodejs.org) (v22+, preferably the latest patched LTS) is installed, or ask the AI to install it for you first.
 
 </details>
 
@@ -399,7 +401,9 @@ Within 3 days of sending, find the message in the send history list and click **
 | **ACCESS_TOKEN** | Every API request must include `x-access-token` header — blocks random crawlers |
 | **Size limit** | Max 8MB per file |
 | **Magic byte validation** | Server verifies real file type (JPEG/PNG/WebP), ignores extension |
-| **@everyone / @here sanitization** | Automatically stripped to prevent abuse |
+| **Mention control** | Enforced via `allowed_mentions`: `@everyone`, `@here` and role pings never notify anyone; individual users can still be mentioned with `<@userID>` |
+| **Delete ID validation** | Message recall only accepts a numeric Discord message ID |
+| **Pixiv URL restriction** | Only URLs starting with `https://i.pximg.net/` are accepted, so the server can't be pointed at arbitrary hosts |
 | **Rate limit** | 10 requests per 60 seconds per IP (distributed with Redis, skipped without) |
 | **Temp file cleanup** | Deleted immediately after processing |
 
@@ -424,7 +428,7 @@ Within 3 days of sending, find the message in the send history list and click **
 │   └── version.js        Return git commit SHA (version stamp)
 ├── index.html            Full-featured frontend (HTML + CSS + JS + Canvas mosaic)
 ├── vercel.json           Vercel routing config
-├── package.json          Dependencies (formidable, @vercel/kv, sharp)
+├── package.json          Dependencies (formidable, @upstash/redis, sharp)
 ├── .env.example          Environment variable template
 ├── .gitignore
 └── LICENSE               MIT license
