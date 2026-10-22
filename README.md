@@ -175,7 +175,7 @@ vercel dev
 | 變數 | 必要 | 說明 |
 |---|---|---|
 | `DISCORD_WEBHOOK_URL` | ✅ | Discord Webhook 完整網址 |
-| `ACCESS_TOKEN` | ❌ 選填 | API 存取密碼（預設：`change-me-to-your-own-token`） |
+| `ACCESS_TOKEN` | ✅ | API 存取密碼，請自訂一組隨機字串；未設定時 API 會直接拒絕服務 |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | ❌ 選填 | Upstash Redis（分散式限流，多區域部署才需要） |
 
 ---
@@ -389,7 +389,7 @@ Within 3 days of sending, find the message in the send history list and click **
 | Variable | Required | Description |
 |---|---|---|
 | `DISCORD_WEBHOOK_URL` | ✅ Yes | Full Discord Webhook URL |
-| `ACCESS_TOKEN` | ❌ Optional | API access password (default: `change-me-to-your-own-token`) |
+| `ACCESS_TOKEN` | ✅ Yes | API access password — set your own random string; the API refuses to run without it |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | ❌ Optional | Upstash Redis (distributed rate limiting, only needed for multi-region) |
 
 ---
